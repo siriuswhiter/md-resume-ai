@@ -1,6 +1,6 @@
 "use client";
 
-import {useRef, useEffect, Suspense, useState} from "react";
+import {useRef, useEffect, Suspense, useState, useCallback} from "react";
 import Editor from "@/components/editor/Editor";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Preview from "@/components/preview/Preview";
@@ -10,6 +10,8 @@ import {useSearchParams} from "next/navigation";
 import {loadFont} from "@/lib/fontUtils";
 import MobileScreenWarning from "@/components/MobileScreenWarning";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { defaultLlmSettings, loadLlmSettings, saveLlmSettings } from "@/lib/llmStorage";
+import type { LlmSettings } from "@/lib/llmTypes";
 
 export default function EditorPage() {
     return (
@@ -37,6 +39,18 @@ function EditorPageContent() {
     const [headerColor, setHeaderColor] = useLocalStorage<string>("HEADER_COLOR", currentTheme.headerColor ?? '#000');
     const [textColor, setTextColor] = useLocalStorage<string>("TEXT_COLOR", currentTheme.textColor ?? '#000');
     const [linkColor, setLinkColor] = useLocalStorage<string>("LINK_COLOR", currentTheme.linkColor ?? '#1a73e8');
+
+    const [rawInput, setRawInput] = useLocalStorage<string>("RESUME_AI_RAW_INPUT", "");
+    const [llmSettings, setLlmSettings] = useState<LlmSettings>(() => defaultLlmSettings());
+
+    useEffect(() => {
+        setLlmSettings(loadLlmSettings());
+    }, []);
+
+    const handleLlmSettingsChange = useCallback((s: LlmSettings) => {
+        setLlmSettings(s);
+        saveLlmSettings(s);
+    }, []);
 
     const previewContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -194,6 +208,11 @@ function EditorPageContent() {
                 setTextColor={setTextColor}
                 linkColor={linkColor}
                 setLinkColor={setLinkColor}
+                aiRawInput={rawInput}
+                onAiRawInputChange={setRawInput}
+                llmSettings={llmSettings}
+                onLlmSettingsChange={handleLlmSettingsChange}
+                onMarkdownGenerated={setMarkdown}
             />
         </div>
     );

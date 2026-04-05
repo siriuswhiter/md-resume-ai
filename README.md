@@ -11,6 +11,11 @@ Markdown Resume is an open-source project that helps users create professional r
 - **Different Themes**: Choose from multiple styles to make your resume unique.
 - **Custom Fonts, Layout and Colors**: Adjust fonts, sizes, line heights, colors, and more to fit your personal style.
 - **Export as PDF**: Export your resume as a PDF document that’s ready to share.
+- **AI resume generation** (added): In the **right sidebar**, section **「AI 生成 Markdown」**—paste raw notes, then **生成并写入编辑器**. Prompts match **`scripts/cv`** (`generateMarkdownResumeBody`).
+  - **服务端 Key（推荐）**：部署时设置环境变量 `OPENAI_API_KEY`，可选 `OPENAI_API_BASE`；前端勾选「使用服务端 Key」或设置 `NEXT_PUBLIC_USE_SERVER_LLM=true`，请求走 **`/api/llm/chat`**，**Key 不进入浏览器**。详见项目根目录 **`.env.example`**。
+  - **自带 Key（BYOK）**：关闭「使用服务端 Key」，在 **「配置 LLM」** 填写 Key（仅存 `localStorage`）。开发直连可用 **`/openai-proxy`**（`next.config.ts`）避免 CORS。
+
+侧栏在 Export 下方增加 **AI** 区块，其余区块顺序与 [markdownresume.app/editor](https://markdownresume.app/editor/) 一致（Theme → Font → Layout → Color）。
 
 ## Technologies Used
 - [React](https://react.dev/)
@@ -45,7 +50,7 @@ npm install
 npm run dev
 ```
 
-5.Open http://localhost:3000 in your browser to see the application.
+3. Open **http://localhost:3001/editor/** in your browser (see `package.json` dev port).
 
 ## Contributing
 We welcome contributions! To contribute:

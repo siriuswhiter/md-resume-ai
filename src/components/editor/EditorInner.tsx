@@ -4,6 +4,7 @@ import {useEffect, useRef} from 'react';
 import {
     MDXEditor,
     headingsPlugin,
+    linkPlugin,
     listsPlugin,
     quotePlugin,
     thematicBreakPlugin,
@@ -42,6 +43,7 @@ export default function EditorInner({markdown, onChangeAction}: EditorInnerProps
                 onChange={handleChange}
                 plugins={[
                     headingsPlugin(),
+                    linkPlugin(),
                     listsPlugin(),
                     quotePlugin(),
                     thematicBreakPlugin(),
