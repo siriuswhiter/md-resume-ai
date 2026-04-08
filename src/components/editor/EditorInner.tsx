@@ -11,13 +11,15 @@ import {
     diffSourcePlugin,
     MDXEditorMethods
 } from '@mdxeditor/editor';
+import { cn } from '@/lib/utils';
 
 interface EditorInnerProps {
     markdown?: string;
     onChangeAction: (value: string) => void;
+    className?: string;
 }
 
-export default function EditorInner({markdown, onChangeAction}: EditorInnerProps) {
+export default function EditorInner({markdown, onChangeAction, className}: EditorInnerProps) {
     const editorRef = useRef<MDXEditorMethods | null>(null);
 
     useEffect(() => {
@@ -36,7 +38,7 @@ export default function EditorInner({markdown, onChangeAction}: EditorInnerProps
     };
 
     return (
-        <div className="editor h-full relative w-1/2 custom-scrollbar overflow-auto bg-white border border-gray-200">
+        <div className={cn("editor relative h-full custom-scrollbar overflow-auto rounded-[28px] border border-slate-200 bg-white", className)}>
             <MDXEditor
                 ref={editorRef}
                 markdown={markdown ?? ''}

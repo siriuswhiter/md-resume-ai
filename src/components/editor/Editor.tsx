@@ -3,10 +3,12 @@
 import dynamic from 'next/dynamic';
 import '@mdxeditor/editor/style.css';
 import './editor.css';
+import { cn } from '@/lib/utils';
 
 interface EditorProps {
     markdown?: string;
     onChangeAction: (value: string) => void;
+    className?: string;
 }
 
 const EditorComponent = dynamic(
@@ -14,13 +16,13 @@ const EditorComponent = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="editor h-full relative w-1/2 custom-scrollbar overflow-auto bg-white border border-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">Loading editor...</span>
+            <div className={cn("editor relative h-full custom-scrollbar overflow-auto rounded-[28px] border border-slate-200 bg-white flex items-center justify-center")}>
+                <span className="text-sm text-slate-400">正在加载编辑器...</span>
             </div>
         )
     }
 );
 
-export default function Editor({markdown, onChangeAction}: EditorProps) {
-    return <EditorComponent markdown={markdown} onChangeAction={onChangeAction} />;
+export default function Editor({markdown, onChangeAction, className}: EditorProps) {
+    return <EditorComponent markdown={markdown} onChangeAction={onChangeAction} className={className} />;
 }

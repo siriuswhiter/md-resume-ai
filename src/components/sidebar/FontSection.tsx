@@ -4,7 +4,7 @@ import React, {useCallback } from "react";
 import { SidebarSection } from "@/components/sidebar/SidebarSection";
 import {ChevronDown, Type} from "lucide-react";
 import { SliderComponent } from "@/components/sidebar/SliderComponent";
-import {fonts} from "@/lib/constants";
+import {fonts, type FontKey} from "@/lib/constants";
 import {loadFont} from "@/lib/fontUtils";
 
 interface FontSectionProps {
@@ -24,7 +24,9 @@ export function FontSection({ onFontChangeAction, onFontSizeChangeAction, font, 
         const selectedFont = e.target.value;
         setFontAction(selectedFont);
         onFontChangeAction(selectedFont);
-        loadFont(fonts[selectedFont]);
+        if (selectedFont in fonts) {
+            loadFont(fonts[selectedFont as FontKey]);
+        }
     }, [onFontChangeAction, setFontAction]);
 
     return (

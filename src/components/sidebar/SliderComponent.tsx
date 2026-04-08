@@ -22,7 +22,7 @@ export const SliderComponent = ({label, value, min, max, step, onChange, current
                 <span>{currentValue}</span>
             </label>
             <Slider
-                defaultValue={[value]}
+                value={[value]}
                 max={max}
                 min={min}
                 step={step}

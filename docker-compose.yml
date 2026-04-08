@@ -1,0 +1,26 @@
+services:
+  web:
+    image: ${DOCKER_IMAGE:-md-resume-ai:local}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_USE_SERVER_LLM: ${NEXT_PUBLIC_USE_SERVER_LLM:-false}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      HOSTNAME: 0.0.0.0
+      NODE_ENV: production
+      PORT: 3000
+      OPENAI_API_BASE: ${OPENAI_API_BASE:-https://api.openai.com}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      NEXT_PUBLIC_USE_SERVER_LLM: ${NEXT_PUBLIC_USE_SERVER_LLM:-false}
+      LLM_DEBUG: ${LLM_DEBUG:-false}
+      PUPPETEER_EXECUTABLE_PATH: ${PUPPETEER_EXECUTABLE_PATH:-/usr/bin/chromium}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

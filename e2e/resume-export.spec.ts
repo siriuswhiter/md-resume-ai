@@ -22,11 +22,11 @@ test.describe('Resume Export Flow', () => {
         await page.waitForURL('**/editor/**');
 
         // 4. Verify key elements exist on the page
-        await expect(page.locator('.previewContainer')).toBeAttached();
+        await expect(page.getByTestId('editor-preview-desktop')).toBeVisible();
         await expect(page.locator('.sidebar')).toBeAttached();
 
-        // 5. Verify Export PDF button exists
-        const exportButton = page.getByRole('button', { name: /Export PDF/i });
+        // 5. Verify export button exists
+        const exportButton = page.getByRole('button', { name: /导出 PDF/i });
         await expect(exportButton).toBeAttached();
 
         await context.close();

@@ -104,9 +104,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const base = (process.env.OPENAI_API_BASE ?? "https://api.openai.com").replace(
-    /\/$/,
-    ""
+  const base = normalizeOpenAiCompatibleBase(
+    process.env.OPENAI_API_BASE ?? "https://api.openai.com"
   );
 
   const upstreamUrl = `${base}/v1/chat/completions`;
