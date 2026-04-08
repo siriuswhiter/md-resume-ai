@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
-  Bot,
   CheckCircle2,
   Download,
   FilePenLine,
@@ -12,7 +11,6 @@ import {
   Loader2,
   PanelRight,
   ScanSearch,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -343,6 +341,11 @@ function EditorPageContent() {
     : llmSettings.apiKey.trim()
       ? "本机 Key 已配置"
       : "AI 待配置";
+  const compactStats = [
+    { label: "字数", value: visibleCharacterCount.toLocaleString() },
+    { label: "章节", value: sectionCount.toString() },
+    { label: "要点", value: bulletCount.toString() },
+  ];
 
   const feedbackStyles: Record<
     FeedbackTone,
@@ -433,75 +436,57 @@ function EditorPageContent() {
             </div>
           ) : null}
 
-          <div className="grid gap-4 xl:grid-cols-3">
-            <div className="rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                文档状态
+          <div
+            data-testid="editor-summary-strip"
+            className="rounded-[24px] border border-slate-200 bg-white/85 px-4 py-3 shadow-[0_12px_36px_rgba(15,23,42,0.05)] backdrop-blur"
+          >
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-sm font-semibold text-slate-900">
+                    {resumeTitle}
+                  </p>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                    {documentStatus}
+                  </span>
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                    {aiStatus}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {structureHint}
+                </p>
               </div>
-              <p className="mt-3 text-2xl font-semibold text-slate-900">
-                {documentStatus}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                内容变更会自动保存到当前浏览器，本页主操作只有导出 PDF。
-              </p>
-            </div>
 
-            <div className="rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Layers3 className="h-4 w-4 text-sky-600" />
-                内容结构
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+                  <Layers3 className="h-3.5 w-3.5" />
+                  当前主题：{themePresetMeta[activeThemeKey].label}
+                </span>
+                {compactStats.map((item) => (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+                  >
+                    <span className="text-slate-900">{item.value}</span>
+                    {item.label}
+                  </span>
+                ))}
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-3">
-                <div>
-                  <p className="text-2xl font-semibold text-slate-900">
-                    {visibleCharacterCount}
-                  </p>
-                  <p className="text-xs text-slate-500">字数</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-slate-900">
-                    {sectionCount}
-                  </p>
-                  <p className="text-xs text-slate-500">章节</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-slate-900">
-                    {bulletCount}
-                  </p>
-                  <p className="text-xs text-slate-500">要点</p>
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                {structureHint}
-              </p>
-            </div>
-
-            <div className="rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Bot className="h-4 w-4 text-amber-600" />
-                AI 辅助状态
-              </div>
-              <p className="mt-3 text-2xl font-semibold text-slate-900">
-                {aiStatus}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                路径固定为“粘贴原始经历 → 生成草稿 → 写入编辑器”，尽量不打断主编辑流。
-              </p>
             </div>
           </div>
 
           <div className="flex gap-4 min-[1400px]:items-start">
             <div className="min-w-0 flex-1">
-              <div className="grid gap-4 min-[1180px]:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
+              <div className="grid gap-4 min-[1180px]:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)]">
                 <section className="rounded-[32px] border border-slate-200 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
                         Markdown 编辑区
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        主工作区，用于手动精修简历内容与结构。
+                        主工作区，优先留给内容精修和结构调整。
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs">
@@ -519,18 +504,18 @@ function EditorPageContent() {
                   <Editor
                     markdown={markdown}
                     onChangeAction={updateMarkdown}
-                    className="h-[calc(100vh-22rem)] min-h-[560px]"
+                    className="h-[calc(100vh-15rem)] min-h-[680px]"
                   />
                 </section>
 
                 <section className="rounded-[32px] border border-slate-200 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
                         实时预览
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        预览最终导出效果，检查层级、行距和主题适配是否合理。
+                        按纸面比例预览导出效果，优先检查排版密度和版心留白。
                       </p>
                     </div>
                     <div className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
@@ -543,13 +528,14 @@ function EditorPageContent() {
                     font={font}
                     previewContainerRef={previewContainerRef}
                     testId="editor-preview-desktop"
-                    className="h-[calc(100vh-22rem)] min-h-[560px]"
+                    paperTestId="editor-preview-paper-desktop"
+                    className="h-[calc(100vh-15rem)] min-h-[680px]"
                   />
                 </section>
               </div>
             </div>
 
-            <aside className="hidden w-[360px] shrink-0 min-[1400px]:block">
+            <aside className="hidden w-[340px] shrink-0 min-[1400px]:block">
               <Sidebar
                 variant="inline"
                 onThemeChange={handleThemeChange}

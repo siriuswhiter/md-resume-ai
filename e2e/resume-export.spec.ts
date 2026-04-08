@@ -32,6 +32,43 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
+    test('editor uses compact summary and A4-style preview canvas', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.goto('http://localhost:3001/editor', { waitUntil: 'networkidle' });
+
+        const summaryStrip = page.getByTestId('editor-summary-strip');
+        const previewShell = page.getByTestId('editor-preview-desktop');
+        const previewPaper = page.getByTestId('editor-preview-paper-desktop');
+
+        await expect(summaryStrip).toBeVisible();
+        await expect(previewShell).toBeVisible();
+        await expect(previewPaper).toBeVisible();
+
+        const paperMetrics = await previewPaper.evaluate((element) => {
+            const htmlElement = element as HTMLElement;
+            const style = window.getComputedStyle(htmlElement);
+
+            return {
+                width: htmlElement.style.width,
+                minHeight: htmlElement.style.minHeight,
+                transform: style.transform,
+            };
+        });
+
+        expect(paperMetrics.width).toBe('794px');
+        expect(paperMetrics.minHeight).toBe('1123px');
+        expect(paperMetrics.transform).not.toBe('none');
+
+        await expect(page.getByText('文档状态', { exact: true })).toHaveCount(0);
+        await expect(page.getByText('AI 辅助状态', { exact: true })).toHaveCount(0);
+
+        await context.close();
+    });
+
     test('PDF export API works directly', async ({ request }) => {
         // Test the PDF generation API endpoint directly
         const response = await request.post('http://localhost:3001/api/generate-pdf', {
