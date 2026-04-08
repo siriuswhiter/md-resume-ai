@@ -1,6 +1,6 @@
-# Sarah Lee
+# Sirius Whiter
 **Data Scientist**  
-San Francisco, CA | sarahlee@example.com | +1 (415) 123-4567 | (https://linkedin.com/in/sarahlee)[LinkedIn] | (https://github.com/sarahlee)[GitHub]
+San Francisco, CA | xuewenjie2017@gmail.com | +1 (415) 123-4567 | (https://linkedin.com/in/siriuswhiter)[LinkedIn] | (https://github.com/siriuswhiter)[GitHub]
 
 ---
 

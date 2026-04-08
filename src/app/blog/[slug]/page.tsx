@@ -69,7 +69,7 @@ export default async function Blog({params}: Params) {
                             url: `${baseUrl}/blog/${post.slug}`,
                             author: {
                                 "@type": "Person",
-                                name: "Rozita Hasani",
+                                name: "Sirius Whiter",
                             },
                         }),
                     }}
@@ -81,7 +81,7 @@ export default async function Blog({params}: Params) {
                 <div className="flex items-center mb-6">
                     <Image src="/author.jpg" alt="Author" width={50} height={50} className="rounded-full"/>
                     <div className="ml-4">
-                        <p className="text-gray-700 font-semibold">Rozita Hasani</p>
+                        <p className="text-gray-700 font-semibold">Sirius Whiter</p>
                         <p className="text-gray-500 text-sm">{formatDate(post.metadata.publishedAt)}</p>
                     </div>
                 </div>

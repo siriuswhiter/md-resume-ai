@@ -43,10 +43,10 @@ Getting started with Markdown is straightforward. You can create a resume with j
 - **Contact Information**
 
     ```markdown
-    # John Doe  
-    **Email:** john.doe@example.com  
-    **GitHub:** [github.com/johndoe](https://github.com/johndoe)  
-    **LinkedIn:** [linkedin.com/in/johndoe](https://linkedin.com/in/johndoe)
+    # Sirius Whiter  
+    **Email:** xuewenjie2017@gmail.com  
+    **GitHub:** [github.com/siriuswhiter](https://github.com/siriuswhiter)  
+    **LinkedIn:** [linkedin.com/in/siriuswhiter](https://linkedin.com/in/siriuswhiter)
     ```
 - **Summary**
     

@@ -17,8 +17,8 @@ The font you choose impacts readability and professionalism. Avoid overly decora
 
 **Example:**  
 ```markdown
-# John Doe  
-**Email:** john.doe@example.com  
+# Sirius Whiter  
+**Email:** xuewenjie2017@gmail.com  
 **Phone:** +1 123-456-7890  
 ```
 
@@ -114,8 +114,8 @@ Ensure your resume is ATS-friendly by avoiding tables, columns, and special char
 **Example:**  
 ```markdown
 ## Contact Information  
-**Email:** john.doe@example.com  
-**GitHub:** [github.com/johndoe](https://github.com/johndoe)  
+**Email:** xuewenjie2017@gmail.com  
+**GitHub:** [github.com/siriuswhiter](https://github.com/siriuswhiter)  
 ```
 
 ---

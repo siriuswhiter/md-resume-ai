@@ -1,6 +1,6 @@
-# John Doe
+# Sirius Whiter
 **Frontend Developer**  
-Amsterdam, Netherlands | johndoe@example.com | +31 6 12345678 | (https://linkedin.com/in/johndoe)[LinkedIn]
+Amsterdam, Netherlands | xuewenjie2017@gmail.com | +31 6 12345678 | (https://linkedin.com/in/siriuswhiter)[LinkedIn]
 
 ---
 

@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "deploy": "next build && firebase deploy",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "capture:editor-shot": "playwright test e2e/editor-workspace-screenshot.spec.ts --project=chromium"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.0",

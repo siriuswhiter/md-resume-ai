@@ -94,8 +94,8 @@ The candidate places their contact information in the header of the document.
 
 **Solution:** Move contact information to the main body:
 ```
-John Doe  
-johndoe@example.com | +1-234-567-890 | LinkedIn: linkedin.com/in/johndoe  
+Sirius Whiter  
+xuewenjie2017@gmail.com | +1-234-567-890 | LinkedIn: linkedin.com/in/siriuswhiter  
 ```
 
 ---

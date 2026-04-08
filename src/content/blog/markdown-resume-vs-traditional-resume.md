@@ -15,9 +15,9 @@ A Markdown resume is created using Markdown, a lightweight markup language that 
 
 **Example of Markdown Syntax for a Resume:**  
 ```markdown
-# John Doe  
-**Email:** john.doe@example.com  
-**GitHub:** [github.com/johndoe](https://github.com/johndoe)  
+# Sirius Whiter  
+**Email:** xuewenjie2017@gmail.com  
+**GitHub:** [github.com/siriuswhiter](https://github.com/siriuswhiter)  
 **Skills:**  
 - JavaScript, Python, React  
 - Docker, Kubernetes, Git  

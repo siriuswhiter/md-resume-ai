@@ -19,7 +19,7 @@ export const SidebarButtons = ({handleExportPdf, isExporting}: ButtonsProps) => 
                 {isExporting ? 'Exporting...' : 'Export PDF'}
             </Button>
             <Button size="sm" asChild   className="w-1/2">
-                <Link href="https://www.buymeacoffee.com/rozitahasani" target="_blank">
+                <Link href="mailto:xuewenjie2017@gmail.com" target="_blank">
                     <Coffee className="h-4 w-4 mr-2"/>
                     Support
                 </Link>

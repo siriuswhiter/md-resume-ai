@@ -1,6 +1,6 @@
-# John Smith
+# Sirius Whiter
 **Marketing Manager**  
-New York, NY | johnsmith@example.com | +1 (123) 456-7890 | (https://linkedin.com/in/johnsmith)[LinkedIn]
+New York, NY | xuewenjie2017@gmail.com | +1 (123) 456-7890 | (https://linkedin.com/in/siriuswhiter)[LinkedIn]
 
 ---
 

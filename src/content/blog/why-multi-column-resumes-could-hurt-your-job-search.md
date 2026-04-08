@@ -58,7 +58,7 @@ Here's what a clean, ATS-friendly single-column resume looks like:
 ```markdown
 # Sarah Johnson
 Senior Software Engineer
-📧 email@example.com | 📱 (555) 555-5555
+📧 xuewenjie2017@gmail.com | 📱 (555) 555-5555
 🌐 linkedin.com/in/sarahjohnson
 
 ## Professional Experience

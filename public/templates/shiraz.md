@@ -1,6 +1,6 @@
-# Michael Johnson
+# Sirius Whiter
 **Project Manager**  
-London, UK | michael.johnson@example.com | +44 1234 567890 | (https://linkedin.com/in/michaeljohnson)[LinkedIn]
+London, UK | xuewenjie2017@gmail.com | +44 1234 567890 | (https://linkedin.com/in/siriuswhiter)[LinkedIn]
 
 ---
 

@@ -13,8 +13,8 @@ test.describe('Resume Export Flow', () => {
         await page.goto('http://localhost:3001/', { waitUntil: 'networkidle' });
         await expect(page).toHaveTitle(/Markdown Resume/);
 
-        // 2. Click "Create Your Resume" button
-        const createButton = page.getByRole('link', { name: /Create Your Resume/i });
+        // 2. Click the primary homepage CTA
+        const createButton = page.getByRole('link', { name: /Start Building|Create My Resume/i }).first();
         await expect(createButton).toBeVisible();
         await createButton.click();
 

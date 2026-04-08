@@ -421,7 +421,7 @@ function EditorPageContent() {
           <MobileScreenWarning content={markdown} theme={theme} font={font} />
         </div>
 
-        <div className="hidden space-y-4 lg:block">
+        <div data-testid="editor-workspace-desktop" className="hidden space-y-4 lg:block">
           {feedback ? (
             <div
               className={`flex items-start gap-3 rounded-[24px] border px-4 py-3 text-sm shadow-sm ${
@@ -573,7 +573,7 @@ function EditorPageContent() {
               已按桌面工作区重构为命令栏 + 编辑/预览双栏 + 右侧工具抽屉；移动端则降级为只读预览。
             </p>
             <Link
-              href="https://www.buymeacoffee.com/rozitahasani"
+              href="mailto:xuewenjie2017@gmail.com"
               target="_blank"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >

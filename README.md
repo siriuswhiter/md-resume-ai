@@ -135,4 +135,4 @@ We welcome contributions! To contribute:
 Licensed under the MIT License.
 
 ## Contact
-For questions or support, please contact [rozita.hasani.work@gmail.com](mailto:rozita.hasani.work@gmail.com).
+For questions or support, please contact [xuewenjie2017@gmail.com](mailto:xuewenjie2017@gmail.com).
