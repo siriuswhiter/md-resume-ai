@@ -374,7 +374,7 @@ function EditorPageContent() {
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
           >
             <FilePenLine className="h-4 w-4 text-sky-600" />
-            Markdown Resume
+            Markdown Resume AI
           </Link>
 
           <div className="hidden min-[880px]:block">

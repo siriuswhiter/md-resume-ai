@@ -11,10 +11,10 @@ test.describe('Resume Export Flow', () => {
 
         // 1. Load homepage
         await page.goto('http://localhost:3001/', { waitUntil: 'networkidle' });
-        await expect(page).toHaveTitle(/Markdown Resume/);
+        await expect(page).toHaveTitle(/Markdown Resume AI/);
 
         // 2. Click the primary homepage CTA
-        const createButton = page.getByRole('link', { name: /Start Building|Create My Resume/i }).first();
+        const createButton = page.getByRole('link', { name: /Start Building|Create My Resume|开始制作|立即创建简历/i }).first();
         await expect(createButton).toBeVisible();
         await createButton.click();
 

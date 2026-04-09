@@ -1,87 +1,125 @@
-# Markdown Resume
+# Markdown Resume AI
 
-![Landing_Image](/public/screenshots/landing-image.png)
+![Editor Workspace](/public/screenshots/editor-workspace.png)
 
-## Introduction
-Markdown Resume is an open-source project that helps users create professional resumes. You write your resume in **markdown format**, and the editor lets you preview, apply different **themes**, customize, and export it as a **PDF**.
+Markdown Resume AI 是一个基于 Markdown 的在线简历编辑与导出工具，面向希望快速产出专业简历的求职者、开发者和独立创作者。
 
-## Features
-- **Write in Markdown**: Use simple markdown to write your resume content.
-- **Live Preview**: See your resume as you type, so you know how it looks.
-- **Different Themes**: Choose from multiple styles to make your resume unique.
-- **Custom Fonts, Layout and Colors**: Adjust fonts, sizes, line heights, colors, and more to fit your personal style.
-- **Export as PDF**: Export your resume as a PDF document that’s ready to share.
-- **AI resume generation** (added): In the **right sidebar**, section **「AI 生成 Markdown」**—paste raw notes, then **生成并写入编辑器**. Prompts match **`scripts/cv`** (`generateMarkdownResumeBody`).
-  - **服务端 Key（推荐）**：部署时设置环境变量 `OPENAI_API_KEY`，可选 `OPENAI_API_BASE`；前端勾选「使用服务端 Key」或设置 `NEXT_PUBLIC_USE_SERVER_LLM=true`，请求走 **`/api/llm/chat`**，**Key 不进入浏览器**。详见项目根目录 **`.env.example`**。
-  - **自带 Key（BYOK）**：关闭「使用服务端 Key」，在 **「配置 LLM」** 填写 Key（仅存 `localStorage`）。开发直连可用 **`/openai-proxy`**（`next.config.ts`）避免 CORS。
+项目提供从内容起草到版式导出的完整工作流：用户可以编写或粘贴原始经历，借助 AI 生成结构化 Markdown，在实时预览中调整模板与样式，并最终导出可直接投递的 PDF 简历。
 
-Editor 已重构为 **顶部命令栏 + 中央编辑/预览双栏 + 右侧工具抽屉**。右侧抽屉拆分为 **样式** 和 **AI 助手** 两个 tab，移动端降级为只读预览。
+## 核心能力
 
-## Technologies Used
-- [React](https://react.dev/)
-- [Next.js](https://nextjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vitejs.dev/)
-- [React DOM](https://reactjs.org/docs/react-dom.html)
-- [React Markdown](https://github.com/remarkjs/react-markdown)
-- [MDXEditor](https://github.com/mdxeditor/editor)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Lucide Icons](https://lucide.dev/)
+- Markdown 驱动的简历编辑：内容结构清晰，易于维护、复用与版本管理。
+- AI 辅助生成：将零散经历、项目笔记或 LinkedIn 信息整理为可编辑的 Markdown 简历草稿。
+- 实时双栏预览：编辑区与纸张预览同时展示，降低排版试错成本。
+- 多模板与样式定制：支持主题、字体、字号、行距、边距、颜色等配置。
+- PDF 导出：通过服务端渲染导出稳定的 PDF 文件，便于投递与归档。
+- 服务端 LLM 接入：支持通过服务端环境变量配置 OpenAI Key，避免在浏览器暴露凭据。
 
-## Screenshots
-Here are some examples of resumes created with this tool:
+## 适用场景
 
-| ![Resume Example](/public/screenshots/mashhad-resume.png) | ![Resume Example](/public/screenshots/isfahan-resume.png) |
-|-----------------------------------------------------------|-----------------------------------------------------------|
-| ![Resume Example](/public/screenshots/tehran-resume.png)  | ![Resume Example](/public/screenshots/shiraz-resume.png)  |
+- 从零开始快速生成一份可投递的简历
+- 将已有中文或英文经历整理为更规范的 Markdown 结构
+- 为不同岗位切换不同模板与排版风格
+- 在本地或自托管环境中部署简历编辑工具
 
-## Quick Start
-To run the project locally:
+## 技术栈
 
-1.Install the dependencies:
+- `Next.js 15`
+- `React 18`
+- `TypeScript`
+- `Tailwind CSS`
+- `MDXEditor`
+- `Playwright`
+- `Puppeteer`
+- `Docker / Docker Compose`
+- `GitHub Actions`
 
-```
+## 快速开始
+
+### 1. 安装依赖
+
+```bash
 npm install
 ```
 
-2.Run the development server:
-
-```
-npm run dev
-```
-
-3. Open **http://localhost:3001/editor/** in your browser (see `package.json` dev port).
-
-## Docker Deployment
-
-This repo now includes a production Docker image and a single-service `docker-compose.yml` for the Next.js app.
-
-1. Copy the example env file:
+### 2. 配置环境变量
 
 ```bash
 cp .env.example .env
 ```
 
-2. Build and start the container locally:
+### 3. 启动开发环境
 
 ```bash
+npm run dev
+```
+
+默认开发地址：`http://localhost:3001/editor`
+
+## 环境变量
+
+项目根目录提供了 [`.env.example`](/root/md-resume-ai/.env.example) 作为示例配置。
+
+| 变量名 | 默认值 | 说明 |
+| --- | --- | --- |
+| `APP_PORT` | `3000` | Docker 运行时对外暴露端口 |
+| `LLM_DEBUG` | `false` | 是否开启 LLM 调试日志 |
+| `NEXT_PUBLIC_USE_SERVER_LLM` | `false` | 前端默认是否走服务端 LLM 路由 |
+| `OPENAI_API_BASE` | `https://api.openai.com` | OpenAI API Base URL |
+| `OPENAI_API_KEY` | 空 | 服务端调用 LLM 所需密钥 |
+| `PUPPETEER_EXECUTABLE_PATH` | `/usr/bin/chromium` | PDF 导出所使用的 Chromium 路径 |
+
+## AI 生成功能说明
+
+编辑器右侧提供 AI 助手，可将原始经历整理成 Markdown 简历草稿。支持两种接入方式：
+
+1. 服务端 Key 模式，推荐用于生产环境。
+   - 在服务端设置 `OPENAI_API_KEY`
+   - 可选设置 `OPENAI_API_BASE`
+   - 前端请求通过 `/api/llm/chat` 转发，密钥不会进入浏览器
+
+2. BYOK 模式，适合本地试用。
+   - 用户在页面中填写自己的 API Key
+   - 配置仅保存在浏览器本地存储中
+
+## Docker 部署
+
+项目内置生产镜像构建能力和单服务 `docker-compose.yml`。
+
+### 本地构建并启动
+
+```bash
+cp .env.example .env
 docker compose --env-file .env up --build -d
 ```
 
-3. Open **http://localhost:3000/** by default, or change `APP_PORT` in `.env`.
+默认访问地址：`http://localhost:3000`
 
-The container uses:
-- `OPENAI_API_KEY` and optional `OPENAI_API_BASE` for the server-side LLM route
-- `NEXT_PUBLIC_USE_SERVER_LLM` for the client default
-- system Chromium inside the image for the PDF export API
+### 容器说明
 
-## GitHub Actions CI/CD
+- 容器内已安装 Chromium，用于 PDF 导出。
+- `NEXT_PUBLIC_USE_SERVER_LLM` 会在构建阶段和运行阶段同时注入。
+- 服务健康检查通过 `http://127.0.0.1:3000/` 完成。
 
-The repo now includes:
-- `CI`: runs `npm ci`, `npm run lint`, `npm run type-check`, and `npm run build`
-- `Deploy`: builds and pushes a GHCR image, then deploys it to your server over SSH with `docker compose`
+## 常用脚本
 
-### Required GitHub Secrets
+```bash
+npm run dev         # 启动本地开发服务（3001）
+npm run build       # 构建生产版本
+npm run start       # 启动生产服务
+npm run lint        # 运行 ESLint
+npm run type-check  # TypeScript 类型检查
+npm run test        # 运行 Playwright E2E 测试
+```
+
+## CI/CD
+
+项目已配置 GitHub Actions：
+
+- `CI`：在 `main` / `master` 的 push 和 pull request 上执行 `lint`、`type-check` 与 `build`
+- `Deploy`：构建并推送 GHCR 镜像，然后通过 SSH 在目标服务器执行 `docker compose` 部署
+
+### 部署所需 Secrets
 
 - `SERVER_HOST`
 - `SERVER_PORT`
@@ -90,49 +128,63 @@ The repo now includes:
 - `SERVER_SSH_KEY`
 - `GHCR_USERNAME`
 - `GHCR_TOKEN`
-- `OPENAI_API_KEY` (only if you want the server-side LLM route enabled)
+- `OPENAI_API_KEY`（启用服务端 LLM 时必需）
 
-### Optional GitHub Variables
+### 可选 Variables
 
 - `APP_PORT`
 - `NEXT_PUBLIC_USE_SERVER_LLM`
 - `OPENAI_API_BASE`
 - `LLM_DEBUG`
 
-### Server Requirements
+### 目标服务器要求
 
-- Docker Engine with `docker compose`
-- A writable deploy directory matching `SERVER_APP_DIR`
-- Network access from the server to `ghcr.io`
+- 已安装 Docker Engine 和 `docker compose`
+- 具备访问 `ghcr.io` 的网络能力
+- 具备可写的部署目录，对应 `SERVER_APP_DIR`
 
-On each push to `main`, GitHub Actions builds a new image, uploads `docker-compose.yml` to the server, writes a `.env.deploy`, then runs `docker compose pull` and `docker compose up -d`.
+## 目录结构
 
-You can also trigger `Deploy` manually with `workflow_dispatch` to reuse an existing image tag.
+```text
+.
+├── .github/workflows/      # CI/CD 配置
+├── docs/                   # 项目文档
+├── e2e/                    # Playwright 测试
+├── public/                 # 静态资源、模板、截图
+├── src/app/                # Next.js App Router 页面与 API
+├── src/components/         # 页面与编辑器组件
+├── src/hooks/              # 自定义 Hooks
+├── src/lib/                # 主题、字体、LLM 与工具函数
+└── src/styles/             # 全局样式与打印样式
+```
 
-## Editor UX TODO
-- [x] 重做 Editor 页面骨架：改成顶部命令栏 + 中央编辑/预览双栏 + 右侧工具抽屉，解决当前页面层级不清和功能堆叠问题。
-- [x] 统一主次操作：全页只保留一个强主按钮 `Export PDF`，将 `Support` 移出核心工作区，避免和导出并列抢主操作。
-- [x] 拆分右侧工具区：将当前侧栏重构为 `样式` 和 `AI 助手` 两个 tab，不再把导出、样式、AI 混在一个连续面板里。
-- [x] 给编辑器补齐专业工作区信息：增加编辑区标题、文档状态、字数/结构提示，让左侧不再只是一个裸输入框。
-- [x] 重做样式配置交互：首屏只保留主题、字体风格、版式密度等高频设置；字号、行距、边距、颜色收进高级设置。
-- [x] 为样式配置提供预设摘要：用户切换主题时应看到预设说明和效果预期，而不是直接面对一组零散参数。
-- [x] 统一文案语言：Editor 核心界面统一中文，避免 `Theme`、`Typography`、`Export PDF`、`Support` 与中文文案混排。
-- [x] 统一视觉系统：收敛按钮样式、圆角、边框、阴影和强调色，去掉现在各区块各自为政的视觉噪音。
-- [x] 调整 AI 生成流程：明确为 `粘贴原始经历 -> 生成草稿 -> 写入编辑器` 的辅助路径，降低它对主编辑流的干扰。
-- [x] 增加关键状态反馈：导出中、AI 生成中、失败提示、配置完成等状态要更明确，避免用户只能靠按钮文字猜当前状态。
-- [x] 补桌面端布局验收：至少检查 1024px、1280px、1440px 三档，确保无拥挤、无遮挡、无层级冲突。
-- [x] 评估移动端降级方案：即使暂不支持完整编辑，也至少提供更完整的说明或只读预览，而不是单纯屏蔽页面。
+## 产品截图
 
-## Contributing
-We welcome contributions! To contribute:
-- Fork the repository
-- Create your branch (git checkout -b feature/YourFeature)
-- Commit changes (git commit -am 'Add feature')
-- Push the branch (git push origin feature/YourFeature)
-- Create a Pull Request
+| 编辑器工作区 | 模板示例 |
+| --- | --- |
+| ![Workspace](/public/screenshots/editor-workspace.png) | ![Template](/public/screenshots/mashhad-resume.png) |
+
+更多模板示例：
+
+- ![Isfahan](/public/screenshots/isfahan-resume.png)
+- ![Tehran](/public/screenshots/tehran-resume.png)
+- ![Shiraz](/public/screenshots/shiraz-resume.png)
+
+## 贡献指南
+
+欢迎提交 Issue 与 Pull Request。建议的协作流程：
+
+1. Fork 仓库并创建功能分支
+2. 完成功能开发与必要测试
+3. 运行 `npm run lint` 和 `npm run type-check`
+4. 提交 Pull Request，并说明变更背景与验证方式
 
 ## License
-Licensed under the MIT License.
+
+本项目基于 MIT License 开源。
 
 ## Contact
-For questions or support, please contact [xuewenjie2017@gmail.com](mailto:xuewenjie2017@gmail.com).
+
+如需反馈问题或合作交流，请联系：
+
+- `xuewenjie2017@gmail.com`
