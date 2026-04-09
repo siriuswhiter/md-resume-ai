@@ -138,6 +138,7 @@ jobs:
           OPENAI_API_KEY=${OPENAI_API_KEY}
           PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
           EOF
+            cp .env.deploy .env
 
             if [ -n \"${GHCR_TOKEN:-}\" ]; then
               if [ -z \"${GHCR_USERNAME:-}\" ]; then
@@ -147,10 +148,19 @@ jobs:
               echo \"${GHCR_TOKEN}\" | docker login ghcr.io -u \"${GHCR_USERNAME}\" --password-stdin
             fi
 
-            docker compose --env-file .env.deploy pull web
-            docker compose --env-file .env.deploy up -d --remove-orphans
+            if command -v docker-compose >/dev/null 2>&1; then
+              compose_cmd=\"docker-compose\"
+            elif docker compose version >/dev/null 2>&1; then
+              compose_cmd=\"docker compose\"
+            else
+              echo \"Neither docker-compose nor docker compose is available\"
+              exit 1
+            fi
 
-            container_id=\"\$(docker compose --env-file .env.deploy ps -q web)\"
+            \$compose_cmd pull web
+            \$compose_cmd up -d --remove-orphans
+
+            container_id=\"\$(\$compose_cmd ps -q web)\"
             if [ -z \"\$container_id\" ]; then
               echo \"web container was not created\"
               exit 1
@@ -169,7 +179,7 @@ jobs:
 
             if [ \"\$status\" != \"healthy\" ]; then
               echo \"container health check failed: \$status\"
-              docker compose --env-file .env.deploy logs --tail 200 web || true
+              \$compose_cmd logs --tail 200 web || true
               exit 1
             fi
           '"
@@ -247,6 +257,7 @@ jobs:
           OPENAI_API_KEY=${OPENAI_API_KEY}
           PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
           EOF
+            cp .env.deploy .env
 
             if [ -n \"${GHCR_TOKEN:-}\" ]; then
               if [ -z \"${GHCR_USERNAME:-}\" ]; then
@@ -256,10 +267,19 @@ jobs:
               echo \"${GHCR_TOKEN}\" | docker login ghcr.io -u \"${GHCR_USERNAME}\" --password-stdin
             fi
 
-            docker compose --env-file .env.deploy pull web
-            docker compose --env-file .env.deploy up -d --remove-orphans
+            if command -v docker-compose >/dev/null 2>&1; then
+              compose_cmd=\"docker-compose\"
+            elif docker compose version >/dev/null 2>&1; then
+              compose_cmd=\"docker compose\"
+            else
+              echo \"Neither docker-compose nor docker compose is available\"
+              exit 1
+            fi
 
-            container_id=\"\$(docker compose --env-file .env.deploy ps -q web)\"
+            \$compose_cmd pull web
+            \$compose_cmd up -d --remove-orphans
+
+            container_id=\"\$(\$compose_cmd ps -q web)\"
             if [ -z \"\$container_id\" ]; then
               echo \"web container was not created\"
               exit 1
@@ -278,7 +298,7 @@ jobs:
 
             if [ \"\$status\" != \"healthy\" ]; then
               echo \"container health check failed: \$status\"
-              docker compose --env-file .env.deploy logs --tail 200 web || true
+              \$compose_cmd logs --tail 200 web || true
               exit 1
             fi
           '"
