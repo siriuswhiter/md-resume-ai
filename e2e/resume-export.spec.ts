@@ -69,6 +69,58 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
+    test('editor preview shows A4 pagination guides', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.goto('http://localhost:3001/editor?template=mashhad', { waitUntil: 'networkidle' });
+
+        await expect(page.getByTestId('editor-preview-paper-desktop')).toBeVisible();
+
+        const pageBreaks = page.getByTestId('preview-page-break');
+        await expect.poll(() => pageBreaks.count()).toBeGreaterThan(0);
+
+        await context.close();
+    });
+
+    test('PDF export payload excludes pagination guides', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.goto('http://localhost:3001/editor?template=mashhad', { waitUntil: 'networkidle' });
+        await expect(page.getByTestId('editor-preview-paper-desktop')).toBeVisible();
+
+        let resolveBody: ((value: any) => void) | null = null;
+        const requestBodyPromise = new Promise<any>((resolve) => {
+            resolveBody = resolve;
+        });
+
+        await page.route(
+            '**/api/generate-pdf',
+            async (route) => {
+                resolveBody?.(route.request().postDataJSON());
+                await route.fulfill({
+                    status: 200,
+                    headers: { 'content-type': 'application/pdf' },
+                    body: '%PDF-1.4\n%EOF\n',
+                });
+            },
+            { times: 1 }
+        );
+
+        await page.getByRole('button', { name: /导出 PDF/i }).click();
+        const requestBody = await requestBodyPromise;
+
+        expect(typeof requestBody?.html).toBe('string');
+        expect(requestBody.html).not.toContain('preview-page-break');
+
+        await context.close();
+    });
+
     test('PDF export API works directly', async ({ request }) => {
         // Test the PDF generation API endpoint directly
         const response = await request.post('http://localhost:3001/api/generate-pdf', {

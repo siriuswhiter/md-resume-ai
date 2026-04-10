@@ -269,13 +269,17 @@ function EditorPageContent() {
         throw new Error("未找到预览容器，暂时无法导出 PDF。");
       }
 
+      const exportRoot = previewElement.querySelector<HTMLElement>(
+        "[data-preview-content-root]"
+      );
+
       const response = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          html: previewElement.innerHTML,
+          html: exportRoot ? exportRoot.innerHTML : previewElement.innerHTML,
           theme,
           styles: {
             fontName: font,

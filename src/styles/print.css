@@ -45,6 +45,10 @@
         page-break-after: auto;
     }
 
+    [data-testid="preview-page-break"] {
+        display: none !important;
+    }
+
     .previewContent p, .previewContent h1, .previewContent h2, .previewContent h3, .previewContent div {
         page-break-inside: avoid;
         page-break-after: auto;
