@@ -22,29 +22,68 @@ function extractJsonObject(text: string): string {
   return text.trim();
 }
 
-const MARKDOWN_RESUME_SYSTEM = `你是资深猎头与简历顾问。用户会粘贴**任意格式**的原始文本（中文为主）。
+function extractErrorMessage(text: string): string {
+  try {
+    const parsed = JSON.parse(text) as {
+      error?: { message?: string };
+      message?: string;
+    };
+    return parsed.error?.message || parsed.message || text;
+  } catch {
+    return text;
+  }
+}
 
-你的任务：**解析并整理成一份可直接用于求职的 Markdown 简历**（结构清晰、措辞专业、要点化）。
+function buildAuthErrorMessage(settings: LlmSettings, detail: string): string {
+  if (settings.useServerRoute) {
+    return `API 401: ${detail}。当前为服务端 Key 模式，请检查服务端环境变量 OPENAI_API_KEY 是否存在且有效。`;
+  }
+  return `API 401: ${detail}。当前为浏览器直连模式，请在“配置 AI”中填写有效 API Key，或切换到服务端 Key（/api/llm/chat）。`;
+}
+
+const MARKDOWN_RESUME_SYSTEM = `你是资深猎头、招聘经理与简历顾问。用户会粘贴**任意格式**的原始文本（中文为主），其中可能包含口语化表述、流水账、顺序混乱、重复信息、无关细节。
+
+你的任务：**不要机械照抄原文，也不要完全按照原始输入顺序组织内容。你需要先提炼重点，再重写成一份更专业、更适合投递的 Markdown 简历。**
+
+【核心写作原则】
+- 先判断候选人的求职方向、经验主线、能力重点，再组织简历结构。
+- 优先保留能够体现岗位匹配度、业务价值、技术深度、协作影响力的内容。
+- 删除或弱化无关、重复、琐碎、口语化的信息。
+- 语言与用户主要输入语言一致，默认输出专业中文简历。
+- 可适度润色，使表达更像成熟候选人，而不是信息搬运。
+- 信息缺失可写「待补充」，但**不要编造**具体数字、公司名、项目结果或时间。
+
+【项目/经历改写要求】
+- 对“工作经历”和“项目经历”中的要点，优先按 **STAR** 思路重写：
+  - S/T：交代场景、目标、约束或业务问题
+  - A：说明你做了什么，突出关键动作、方案、技术和职责
+  - R：尽量落到结果、影响、效率、质量、稳定性、成本、协作成果
+- 输出时不要显式写“S/T/A/R”标签，而是写成自然、专业的简历 bullet。
+- bullet 应以成果导向为主，避免“负责了”“参与了”这类空泛表述；尽量改为“主导 / 设计 / 搭建 / 优化 / 推动 / 交付 / 落地”等更有力度的表达。
+- 若用户提供了结果数据就保留；若没有明确数据，可写定性结果，如“提升可维护性”“缩短交付周期”“改善用户体验”，但不要伪造精确数字。
 
 【版式要求】
-- 语言与用户主要输入语言一致。
-- 信息缺失可写「待补充」，不要编造具体数字/公司名。
 - 使用标准 GitHub Flavored Markdown：标题用 # / ## / ###，列表用 - 或 1.，强调用 **bold** 与 *italic*。
-- 不要输出 HTML；不要输出 \`\`\` 代码围栏包裹全文；不要输出 json。
+- 不要输出 HTML；不要输出 \`\`\` 代码围栏包裹全文；不要输出解释文字。
+- 简历结构清晰，优先生成适合单页或双页简历的紧凑表达。
 
 【输出格式】
 只输出一个 JSON 对象，且**仅**包含字段 body_markdown（字符串）。
 body_markdown 为完整 Markdown 正文，建议结构：
 1) # 姓名
 2) 一行联系方式（手机 · 邮箱 · 城市）
-3) 可选：求职意向行
-4) ## 教育经历
-5) ## 工作经历（每段含小标题行 + 要点列表）
-6) 按需：## 项目经历 / ## 技能 / ## 自我评价 等
+3) 可选：求职意向 / 个人摘要
+4) ## 工作经历
+5) ## 项目经历
+6) ## 教育经历
+7) ## 技能
+8) 按需补充：## 证书 / ## 获奖 / ## 自我评价
 
-【重要】body_markdown 中若含双引号，需保证 JSON 合法。`;
+【重要】
+- 允许你重组章节顺序，以突出最有竞争力的信息。
+- body_markdown 中若含双引号，需保证 JSON 合法。`;
 
-const MD_USER_INSTRUCTION = `请解析用户粘贴的内容，输出 JSON（仅字段 body_markdown）：`;
+const MD_USER_INSTRUCTION = `请从用户粘贴的原始材料中提炼重点，重组结构，并把项目/经历按更专业、结果导向、符合 STAR 思路的简历语言重写。输出 JSON（仅字段 body_markdown）：`;
 
 /**
  * 从用户原始文本生成 Markdown 简历正文，供 MD 编辑器使用。
@@ -53,6 +92,10 @@ export async function generateMarkdownResumeBody(
   settings: LlmSettings,
   rawText: string
 ): Promise<string> {
+  if (!settings.useServerRoute && !settings.apiKey.trim()) {
+    throw new Error("当前为浏览器直连模式，但未配置 API Key。请在“配置 AI”中填写密钥，或启用服务端 Key。");
+  }
+
   const url = resolveChatUrl(settings);
   const body = {
     model: settings.model,
@@ -88,7 +131,14 @@ export async function generateMarkdownResumeBody(
         `API ${res.status}：返回了 HTML 页面而非 JSON。请确认请求路径为 /api/llm/chat/（带尾部斜杠，与 Next trailingSlash 一致），并检查服务端路由是否正常。`
       );
     }
-    throw new Error(`API ${res.status}: ${responseText.slice(0, 500)}`);
+    const detail = extractErrorMessage(responseText).slice(0, 500);
+    if (
+      res.status === 401 &&
+      /missing authentication header|authorization/i.test(detail)
+    ) {
+      throw new Error(buildAuthErrorMessage(settings, detail));
+    }
+    throw new Error(`API ${res.status}: ${detail}`);
   }
 
   if (trimmed.startsWith("<")) {
