@@ -14,6 +14,7 @@ interface MobileScreenWarningProps {
     headerColor: string;
     textColor: string;
     linkColor: string;
+    customCss?: string;
 }
 
 export default function MobileScreenWarning({
@@ -28,6 +29,7 @@ export default function MobileScreenWarning({
     headerColor,
     textColor,
     linkColor,
+    customCss,
 }: MobileScreenWarningProps) {
     return (
         <div className="mobile-warning space-y-4 px-4 py-5 lg:hidden">
@@ -78,6 +80,7 @@ export default function MobileScreenWarning({
                     headerColor={headerColor}
                     textColor={textColor}
                     linkColor={linkColor}
+                    customCss={customCss}
                     testId="editor-preview-mobile"
                     className="max-h-[60vh] min-h-[360px] rounded-[24px] border-slate-200 p-4"
                 />

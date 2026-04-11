@@ -8,20 +8,20 @@ import {
   Palette,
   SlidersHorizontal,
   Sparkles,
-  Type,
   X,
 } from "lucide-react";
 import {
   densityPresets,
   fonts,
-  themePresetMeta,
   type DensityPresetId,
   type ThemeKey,
+  themePresetMeta,
 } from "@/lib/constants";
 import { SidebarAiSection } from "@/components/sidebar/SidebarAiSection";
 import { SliderComponent } from "@/components/sidebar/SliderComponent";
 import ColorPicker from "@/components/sidebar/ColorPicker";
 import type { LlmSettings } from "@/lib/llmTypes";
+import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
 import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
@@ -48,12 +48,24 @@ interface SidebarProps {
   setTextColor: (color: string) => void;
   linkColor: string;
   setLinkColor: (color: string) => void;
+  customCss: string;
+  onCustomCssChange: (css: string) => void;
   font: string;
   aiRawInput: string;
   onAiRawInputChange: (v: string) => void;
   llmSettings: LlmSettings;
-  onLlmSettingsChange: (s: LlmSettings) => void;
   onMarkdownGenerated: (md: string) => void;
+  theme: string;
+  stylePrompt: string;
+  onStylePromptChange: (v: string) => void;
+  savedStyleTemplates: SavedStyleTemplate[];
+  onSaveStyleTemplate: (template: {
+    name: string;
+    css: string;
+    summary?: string;
+  }) => void;
+  onApplyStyleTemplate: (css: string) => void;
+  onDeleteStyleTemplate: (id: string) => void;
 }
 
 export default function Sidebar({
@@ -80,12 +92,20 @@ export default function Sidebar({
   setTextColor,
   linkColor,
   setLinkColor,
+  customCss,
+  onCustomCssChange,
   font,
   aiRawInput,
   onAiRawInputChange,
   llmSettings,
-  onLlmSettingsChange,
   onMarkdownGenerated,
+  theme,
+  stylePrompt,
+  onStylePromptChange,
+  savedStyleTemplates,
+  onSaveStyleTemplate,
+  onApplyStyleTemplate,
+  onDeleteStyleTemplate,
 }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<"style" | "ai">("style");
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -104,14 +124,14 @@ export default function Sidebar({
   const panel = (
     <div className="sidebar flex h-full flex-col rounded-[30px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600">
-            <PanelRight className="h-3.5 w-3.5" />
-            右侧工具抽屉
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+            <PanelRight className="h-4.5 w-4.5" />
+          </span>
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">工具面板</h2>
+            <p className="mt-1 text-xs text-slate-500">主题、排版、AI</p>
           </div>
-          <h2 className="mt-2 text-base font-semibold text-slate-900">
-            样式与 AI 辅助
-          </h2>
         </div>
         {variant === "drawer" && onClose ? (
           <button
@@ -155,39 +175,17 @@ export default function Sidebar({
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {activeTab === "style" ? (
           <div className="space-y-4">
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    当前主题预设
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
-                    切换主题时先看摘要，再决定是否进入高级设置微调。
-                  </p>
-                </div>
-                <div className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-slate-600">
-                  {selectedThemeMeta.label}
-                </div>
-              </div>
-              <div className="mt-3 rounded-2xl border border-white/80 bg-white px-4 py-4">
-                <p className="text-sm font-medium text-slate-900">
-                  {selectedThemeMeta.summary}
-                </p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  适合场景：{selectedThemeMeta.bestFor}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                  效果预期：{selectedThemeMeta.expectation}
-                </p>
-              </div>
-            </div>
-
             <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="mb-3 flex items-center gap-2">
-                <Palette className="h-4 w-4 text-sky-600" />
-                <p className="text-sm font-semibold text-slate-900">主题预设</p>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-sky-600" />
+                  <p className="text-sm font-semibold text-slate-900">主题</p>
+                </div>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                  当前：{selectedThemeMeta.label}
+                </span>
               </div>
-              <div className="grid gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {Object.values(themePresetMeta).map((preset) => {
                   const active = preset.id === normalizedTheme;
                   return (
@@ -195,24 +193,19 @@ export default function Sidebar({
                       type="button"
                       key={preset.id}
                       onClick={() => onThemeChange(preset.id)}
-                      className={`rounded-[22px] border px-4 py-4 text-left transition ${
+                      className={`rounded-[18px] border px-3 py-3 text-left transition ${
                         active
                           ? "border-sky-300 bg-sky-50 shadow-sm"
                           : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {preset.label}
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
-                            {preset.summary}
-                          </p>
-                        </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-900">
+                          {preset.label}
+                        </p>
                         {active ? (
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-600 text-white">
-                            <Check className="h-3.5 w-3.5" />
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-600 text-white">
+                            <Check className="h-3 w-3" />
                           </span>
                         ) : null}
                       </div>
@@ -224,7 +217,7 @@ export default function Sidebar({
 
             <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
-                <Type className="h-4 w-4 text-sky-600" />
+                <Palette className="h-4 w-4 text-sky-600" />
                 <p className="text-sm font-semibold text-slate-900">高频设置</p>
               </div>
 
@@ -254,7 +247,7 @@ export default function Sidebar({
                 <label className="mb-2 block text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
                   版式密度
                 </label>
-                <div className="grid gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {densityPresets.map((preset) => {
                     const active = matchedDensity === preset.id;
                     return (
@@ -262,30 +255,21 @@ export default function Sidebar({
                         type="button"
                         key={preset.id}
                         onClick={() => onDensityPresetChange(preset.id)}
-                        className={`rounded-[22px] border px-4 py-3 text-left transition ${
+                        className={`rounded-[18px] border px-3 py-3 text-left transition ${
                           active
                             ? "border-sky-300 bg-sky-50"
                             : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="text-sm font-medium text-slate-900">
-                            {preset.label}
-                          </p>
-                          {active ? (
-                            <span className="rounded-full bg-sky-600 px-2 py-0.5 text-[11px] font-medium text-white">
-                              当前
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="mt-1 text-xs leading-5 text-slate-500">
-                          {preset.summary}
+                        <p className="text-sm font-medium text-slate-900">
+                          {preset.label}
                         </p>
                       </button>
                     );
                   })}
                 </div>
               </div>
+
             </div>
 
             <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
@@ -299,9 +283,6 @@ export default function Sidebar({
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
                       高级设置
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-slate-500">
-                      字号、行距、边距与颜色都收在这里。
                     </p>
                   </div>
                 </div>
@@ -391,6 +372,22 @@ export default function Sidebar({
                       onChange={setLinkColor}
                     />
                   </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+                      自定义 CSS
+                    </p>
+                    <textarea
+                      value={customCss}
+                      onChange={(e) => onCustomCssChange(e.target.value)}
+                      spellCheck={false}
+                      placeholder={`.previewContainer h2 {\n  border-bottom: 1px solid var(--headerColor);\n  padding-bottom: 0.35rem;\n}`}
+                      className="min-h-[180px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs leading-6 text-slate-800 outline-none transition hover:border-slate-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                    />
+                    <p className="mt-3 text-xs leading-5 text-slate-500">
+                      直接写作用于 `.previewContainer` 的 CSS。预览与 PDF 导出会共用这份样式。
+                    </p>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -400,8 +397,16 @@ export default function Sidebar({
             rawInput={aiRawInput}
             onRawInputChange={onAiRawInputChange}
             llmSettings={llmSettings}
-            onLlmSettingsChange={onLlmSettingsChange}
             onMarkdownGenerated={onMarkdownGenerated}
+            theme={theme}
+            customCss={customCss}
+            onCustomCssChange={onCustomCssChange}
+            stylePrompt={stylePrompt}
+            onStylePromptChange={onStylePromptChange}
+            savedStyleTemplates={savedStyleTemplates}
+            onSaveStyleTemplate={onSaveStyleTemplate}
+            onApplyStyleTemplate={onApplyStyleTemplate}
+            onDeleteStyleTemplate={onDeleteStyleTemplate}
           />
         )}
       </div>

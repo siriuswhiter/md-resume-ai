@@ -32,7 +32,7 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
-    test('editor uses compact summary and A4-style preview canvas', async ({ browser }) => {
+    test('editor keeps the sidebar compact and uses an A4-style preview canvas', async ({ browser }) => {
         const context = await browser.newContext({
             viewport: { width: 1600, height: 1200 },
         });
@@ -40,13 +40,14 @@ test.describe('Resume Export Flow', () => {
 
         await page.goto('http://localhost:3001/editor', { waitUntil: 'networkidle' });
 
-        const summaryStrip = page.getByTestId('editor-summary-strip');
         const previewShell = page.getByTestId('editor-preview-desktop');
         const previewPaper = page.getByTestId('editor-preview-paper-desktop');
 
-        await expect(summaryStrip).toBeVisible();
         await expect(previewShell).toBeVisible();
         await expect(previewPaper).toBeVisible();
+        await expect(page.getByRole('button', { name: 'AI 配置' })).toBeVisible();
+        await expect(page.getByText('当前主题预设', { exact: true })).toHaveCount(0);
+        await expect(page.getByText('自定义 CSS', { exact: true })).toHaveCount(0);
 
         const paperMetrics = await previewPaper.evaluate((element) => {
             const htmlElement = element as HTMLElement;
@@ -119,6 +120,11 @@ test.describe('Resume Export Flow', () => {
         await page.goto('http://localhost:3001/editor?template=mashhad', { waitUntil: 'networkidle' });
         await expect(page.getByTestId('editor-preview-paper-desktop')).toBeVisible();
 
+        await page.getByRole('button', { name: '高级设置' }).click();
+        const customCssInput = page.locator('.sidebar textarea').first();
+        await expect(customCssInput).toBeVisible();
+        await customCssInput.fill('.previewContainer h2 { border-bottom: 1px solid var(--headerColor); }');
+
         let resolveBody: ((value: any) => void) | null = null;
         const requestBodyPromise = new Promise<any>((resolve) => {
             resolveBody = resolve;
@@ -142,6 +148,7 @@ test.describe('Resume Export Flow', () => {
 
         expect(typeof requestBody?.html).toBe('string');
         expect(requestBody.html).not.toContain('preview-page-break');
+        expect(requestBody.styles?.customCss).toContain('.previewContainer h2');
 
         await context.close();
     });
@@ -162,6 +169,7 @@ test.describe('Resume Export Flow', () => {
                     headerColor: '#222',
                     textColor: '#444',
                     linkColor: '#1a73e8',
+                    customCss: '.previewContainer h2 { border-bottom: 1px solid #222; }',
                 },
             },
         });

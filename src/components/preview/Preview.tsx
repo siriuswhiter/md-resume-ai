@@ -32,6 +32,7 @@ interface PreviewProps {
     headerColor: string;
     textColor: string;
     linkColor: string;
+    customCss?: string;
     previewContainerRef?: MutableRefObject<HTMLDivElement | null>;
     className?: string;
     testId?: string;
@@ -173,6 +174,7 @@ export default function Preview({
     headerColor,
     textColor,
     linkColor,
+    customCss,
     previewContainerRef,
     className,
     testId,
@@ -253,6 +255,7 @@ export default function Preview({
         };
     }, [
         content,
+        customCss,
         font,
         theme,
         fontScale,
@@ -274,6 +277,9 @@ export default function Preview({
                 className
             )}
         >
+            {customCss?.trim() ? (
+                <style data-preview-custom-style>{customCss}</style>
+            ) : null}
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute left-[-99999px] top-0 opacity-0"

@@ -14,6 +14,7 @@ interface PdfRequestBody {
         headerColor: string;
         textColor: string;
         linkColor: string;
+        customCss?: string;
     };
 }
 
@@ -445,6 +446,7 @@ export async function POST(request: NextRequest) {
     try {
         const body: PdfRequestBody = await request.json();
         const { html, theme, styles } = body;
+        const escapedCustomCss = (styles.customCss ?? "").replace(/<\/style/gi, "<\\/style");
 
         const fullHtml = `
 <!DOCTYPE html>
@@ -471,6 +473,7 @@ export async function POST(request: NextRequest) {
         ${isfahanTheme}
         ${shirazTheme}
         ${mashhadTheme}
+        ${escapedCustomCss}
 
         @page {
             margin: 24px 0;

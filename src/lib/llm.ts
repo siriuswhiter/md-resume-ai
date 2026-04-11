@@ -1,4 +1,5 @@
 import type { LlmSettings } from "./llmTypes";
+import type { GeneratedStyleTemplate } from "./styleAssistantTypes";
 
 function resolveChatUrl(settings: LlmSettings): string {
   if (settings.useServerRoute) {
@@ -84,6 +85,24 @@ body_markdown 为完整 Markdown 正文，建议结构：
 - body_markdown 中若含双引号，需保证 JSON 合法。`;
 
 const MD_USER_INSTRUCTION = `请从用户粘贴的原始材料中提炼重点，重组结构，并把项目/经历按更专业、结果导向、符合 STAR 思路的简历语言重写。输出 JSON（仅字段 body_markdown）：`;
+
+const STYLE_ASSISTANT_SYSTEM = `你是资深前端样式工程师，负责为 Markdown 简历预览生成可直接使用的 CSS。
+
+【上下文】
+- 页面内容渲染在 .previewContainer 内。
+- 常见元素包括：h1, h2, h3, p, ul, ol, li, a, strong, em, hr。
+- 允许使用 CSS 变量：var(--headerColor), var(--textColor), var(--linkColor), var(--fontScale), var(--headingScale), var(--lineHeightScale), var(--xPaddingScale), var(--yPaddingScale)。
+
+【输出要求】
+- 只输出一个 JSON 对象，仅包含字段：name, css, summary。
+- css 必须是可直接粘贴的纯 CSS，不要包含 \`\`\` 代码围栏，不要带解释。
+- 所有选择器必须限定在 .previewContainer 下，避免污染页面其他区域。
+- 不要使用 @import，不要依赖外部资源，不要编造不存在的类名。
+- 以可维护、克制、适合简历打印与 PDF 导出为优先。
+- 若用户要求与当前 CSS 合并，请在此基础上增量修改，而不是完全推翻。
+`;
+
+const STYLE_USER_INSTRUCTION = `请根据用户要求输出一个样式模板 JSON（字段仅 name, css, summary）。`;
 
 /**
  * 从用户原始文本生成 Markdown 简历正文，供 MD 编辑器使用。
@@ -176,4 +195,115 @@ export async function generateMarkdownResumeBody(
   if (!md) throw new Error("模型未返回有效的 body_markdown");
 
   return md;
+}
+
+export async function generatePreviewCssTemplate(
+  settings: LlmSettings,
+  input: {
+    request: string;
+    theme: string;
+    currentCss?: string;
+  }
+): Promise<GeneratedStyleTemplate> {
+  if (!settings.useServerRoute && !settings.apiKey.trim()) {
+    throw new Error("当前为浏览器直连模式，但未配置 API Key。请先在页面右上角完成 AI 配置。");
+  }
+
+  const url = resolveChatUrl(settings);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (!settings.useServerRoute && settings.apiKey.trim()) {
+    headers.Authorization = `Bearer ${settings.apiKey}`;
+  }
+
+  const body = {
+    model: settings.model,
+    temperature: 0.3,
+    messages: [
+      { role: "system" as const, content: STYLE_ASSISTANT_SYSTEM },
+      {
+        role: "user" as const,
+        content: `${STYLE_USER_INSTRUCTION}
+
+当前主题：${input.theme}
+
+当前已有 CSS：
+-----
+${input.currentCss?.trim() || "(空)"}
+-----
+
+用户需求：
+-----
+${input.request.trim()}
+-----`,
+      },
+    ],
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const responseText = await res.text();
+  const trimmed = responseText.trimStart();
+
+  if (!res.ok) {
+    if (trimmed.startsWith("<")) {
+      throw new Error(
+        `API ${res.status}：返回了 HTML 页面而非 JSON。请确认请求路径为 /api/llm/chat/（带尾部斜杠），并检查服务端配置。`
+      );
+    }
+    const detail = extractErrorMessage(responseText).slice(0, 500);
+    if (
+      res.status === 401 &&
+      /missing authentication header|authorization/i.test(detail)
+    ) {
+      throw new Error(buildAuthErrorMessage(settings, detail));
+    }
+    throw new Error(`API ${res.status}: ${detail}`);
+  }
+
+  if (trimmed.startsWith("<")) {
+    throw new Error(
+      "接口返回了 HTML 而非 JSON（常见于路径缺少尾部斜杠、404 或代理错误页）。请使用路径 /api/llm/chat/ 后重试。"
+    );
+  }
+
+  let data: { choices?: { message?: { content?: string } }[] };
+  try {
+    data = JSON.parse(responseText) as {
+      choices?: { message?: { content?: string } }[];
+    };
+  } catch {
+    throw new Error(`无法解析接口 JSON：${responseText.slice(0, 280)}`);
+  }
+
+  const content = data.choices?.[0]?.message?.content?.trim() ?? "";
+  if (!content) throw new Error("模型返回为空");
+
+  let parsed: Partial<GeneratedStyleTemplate>;
+  try {
+    parsed = JSON.parse(extractJsonObject(content)) as Partial<GeneratedStyleTemplate>;
+  } catch {
+    throw new Error("无法解析样式助手返回的 JSON，请重试或缩短要求");
+  }
+
+  const css = typeof parsed.css === "string" ? parsed.css.trim() : "";
+  const name = typeof parsed.name === "string" ? parsed.name.trim() : "";
+  const summary =
+    typeof parsed.summary === "string" ? parsed.summary.trim() : "";
+
+  if (!css) throw new Error("样式助手未返回有效 CSS");
+  if (!css.includes(".previewContainer")) {
+    throw new Error("样式助手返回的 CSS 未限定在 .previewContainer 下，已拒绝应用");
+  }
+
+  return {
+    name: name || "未命名模板",
+    css,
+    summary,
+  };
 }

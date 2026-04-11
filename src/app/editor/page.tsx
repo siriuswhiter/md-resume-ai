@@ -7,16 +7,19 @@ import {
   CheckCircle2,
   Download,
   FilePenLine,
+  KeyRound,
   Layers3,
   Loader2,
   PanelRight,
   ScanSearch,
+  Server,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Editor from "@/components/editor/Editor";
 import Sidebar from "@/components/sidebar/Sidebar";
 import Preview from "@/components/preview/Preview";
 import MobileScreenWarning from "@/components/MobileScreenWarning";
+import { LlmSettingsModal } from "@/components/ai/LlmSettingsModal";
 import {
   densityPresets,
   fonts,
@@ -36,6 +39,7 @@ import {
   saveLlmSettings,
 } from "@/lib/llmStorage";
 import type { LlmSettings } from "@/lib/llmTypes";
+import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
 
 type FeedbackTone = "info" | "success" | "error";
 
@@ -100,10 +104,23 @@ function EditorPageContent() {
     "LINK_COLOR",
     currentTheme.linkColor ?? "#1a73e8"
   );
+  const [customCss, setCustomCss] = useLocalStorage<string>(
+    "CUSTOM_PREVIEW_CSS",
+    ""
+  );
+  const [stylePrompt, setStylePrompt] = useLocalStorage<string>(
+    "STYLE_ASSISTANT_PROMPT",
+    ""
+  );
+  const [savedStyleTemplates, setSavedStyleTemplates] = useLocalStorage<SavedStyleTemplate[]>(
+    "STYLE_ASSISTANT_TEMPLATES",
+    []
+  );
   const [rawInput, setRawInput] = useLocalStorage<string>("RESUME_AI_RAW_INPUT", "");
 
   const [llmSettings, setLlmSettings] = useState<LlmSettings>(() => defaultLlmSettings());
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -134,11 +151,41 @@ function EditorPageContent() {
   const handleLlmSettingsChange = useCallback((settings: LlmSettings) => {
     setLlmSettings(settings);
     saveLlmSettings(settings);
+  }, []);
+
+  const handleSaveStyleTemplate = useCallback((template: {
+    name: string;
+    css: string;
+    summary?: string;
+  }) => {
+    const nextTemplate: SavedStyleTemplate = {
+      id: `style_${Date.now()}`,
+      name: template.name,
+      css: template.css,
+      summary: template.summary,
+      createdAt: new Date().toISOString(),
+    };
+    setSavedStyleTemplates([nextTemplate, ...savedStyleTemplates]);
     setFeedback({
       tone: "success",
-      message: "AI 配置已更新。",
+      message: `样式模板“${template.name}”已保存到本地。`,
     });
-  }, []);
+  }, [savedStyleTemplates, setSavedStyleTemplates]);
+
+  const handleApplyStyleTemplate = useCallback((css: string) => {
+    setCustomCss(css);
+  }, [setCustomCss]);
+
+  const handleDeleteStyleTemplate = useCallback((id: string) => {
+    const target = savedStyleTemplates.find((item) => item.id === id);
+    setSavedStyleTemplates(savedStyleTemplates.filter((item) => item.id !== id));
+    if (target) {
+      setFeedback({
+        tone: "success",
+        message: `样式模板“${target.name}”已删除。`,
+      });
+    }
+  }, [savedStyleTemplates, setSavedStyleTemplates]);
 
   const applyThemeSettings = useCallback(
     (themeName: string) => {
@@ -263,6 +310,7 @@ function EditorPageContent() {
             headerColor,
             textColor,
             linkColor,
+            customCss,
           },
         }),
       });
@@ -388,6 +436,19 @@ function EditorPageContent() {
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              onClick={() => setSettingsOpen(true)}
+            >
+              {llmSettings.useServerRoute ? (
+                <Server className="h-4 w-4" />
+              ) : (
+                <KeyRound className="h-4 w-4" />
+              )}
+              AI 配置
+            </button>
+
+            <button
+              type="button"
               className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:inline-flex min-[1380px]:hidden"
               onClick={() => setDrawerOpen(true)}
             >
@@ -431,6 +492,7 @@ function EditorPageContent() {
             headerColor={headerColor}
             textColor={textColor}
             linkColor={linkColor}
+            customCss={customCss}
           />
         </div>
 
@@ -504,6 +566,7 @@ function EditorPageContent() {
                       headerColor={headerColor}
                       textColor={textColor}
                       linkColor={linkColor}
+                      customCss={customCss}
                       previewContainerRef={previewContainerRef}
                       testId="editor-preview-desktop"
                       paperTestId="editor-preview-paper-desktop"
@@ -537,12 +600,20 @@ function EditorPageContent() {
                 setTextColor={setTextColor}
                 linkColor={linkColor}
                 setLinkColor={setLinkColor}
+                customCss={customCss}
+                onCustomCssChange={setCustomCss}
                 font={font}
                 aiRawInput={rawInput}
                 onAiRawInputChange={setRawInput}
                 llmSettings={llmSettings}
-                onLlmSettingsChange={handleLlmSettingsChange}
                 onMarkdownGenerated={updateMarkdown}
+                theme={theme}
+                stylePrompt={stylePrompt}
+                onStylePromptChange={setStylePrompt}
+                savedStyleTemplates={savedStyleTemplates}
+                onSaveStyleTemplate={handleSaveStyleTemplate}
+                onApplyStyleTemplate={handleApplyStyleTemplate}
+                onDeleteStyleTemplate={handleDeleteStyleTemplate}
               />
             </aside>
           </div>
@@ -573,12 +644,27 @@ function EditorPageContent() {
         setTextColor={setTextColor}
         linkColor={linkColor}
         setLinkColor={setLinkColor}
+        customCss={customCss}
+        onCustomCssChange={setCustomCss}
         font={font}
         aiRawInput={rawInput}
         onAiRawInputChange={setRawInput}
         llmSettings={llmSettings}
-        onLlmSettingsChange={handleLlmSettingsChange}
         onMarkdownGenerated={updateMarkdown}
+        theme={theme}
+        stylePrompt={stylePrompt}
+        onStylePromptChange={setStylePrompt}
+        savedStyleTemplates={savedStyleTemplates}
+        onSaveStyleTemplate={handleSaveStyleTemplate}
+        onApplyStyleTemplate={handleApplyStyleTemplate}
+        onDeleteStyleTemplate={handleDeleteStyleTemplate}
+      />
+
+      <LlmSettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        settings={llmSettings}
+        onChange={handleLlmSettingsChange}
       />
     </div>
   );
