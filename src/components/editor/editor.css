@@ -4,14 +4,21 @@
 
 .editor .mdxeditor {
     display: flex;
+    height: 100%;
     min-height: 100%;
     flex-direction: column;
 }
 
 .editor .mdxeditor-diff-source-wrapper,
 .editor .mdxeditor-rich-text-editor,
-.editor .mdxeditor-root-contenteditable {
+.editor .mdxeditor-root-contenteditable,
+.editor .mdxeditor-source-editor,
+.editor .sp-wrapper,
+.editor .sp-layout,
+.editor .sp-editor,
+.editor .cm-editor {
     min-height: 0;
+    height: 100%;
     flex: 1 1 auto;
 }
 
@@ -19,9 +26,8 @@
     overflow: auto;
 }
 
-.editor .mdxeditor-source-editor,
-.editor .cm-editor,
 .editor .cm-scroller {
+    min-height: 0;
     height: 100%;
 }
 

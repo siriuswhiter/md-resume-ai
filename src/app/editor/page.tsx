@@ -470,7 +470,7 @@ function EditorPageContent() {
           <div className="grid min-h-0 flex-1 gap-3 min-[1380px]:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
             <div className="min-w-0 min-h-0 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
@@ -486,7 +486,7 @@ function EditorPageContent() {
                       </span>
                     </div>
                   </div>
-                  <div className="min-h-0 overflow-hidden">
+                  <div className="min-h-0 flex-1 overflow-hidden">
                     <Editor
                       markdown={markdown}
                       onChangeAction={updateMarkdown}
@@ -495,7 +495,7 @@ function EditorPageContent() {
                   </div>
                 </section>
 
-                <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
@@ -506,7 +506,7 @@ function EditorPageContent() {
                       A4 分页预览
                     </div>
                   </div>
-                  <div className="min-h-0 overflow-hidden">
+                  <div className="min-h-0 flex-1 overflow-hidden">
                     <Preview
                       content={markdown}
                       theme={theme}

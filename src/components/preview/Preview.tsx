@@ -67,7 +67,7 @@ export default function Preview({
             data-testid={testId}
             ref={previewShellRef}
             className={cn(
-                "relative h-full overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] overscroll-contain sm:p-3",
+                "relative flex h-full min-h-0 flex-col overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] overscroll-contain sm:p-3",
                 className
             )}
         >
@@ -98,7 +98,7 @@ export default function Preview({
                 </div>
             </div>
 
-            <div className="mx-auto flex min-h-full w-full justify-center">
+            <div className="mx-auto flex min-h-full w-full flex-1 justify-center">
                 <div
                     className="flex w-full flex-col items-center gap-4"
                     style={{ maxWidth: `${A4_PAPER_WIDTH * paperScale}px` }}
