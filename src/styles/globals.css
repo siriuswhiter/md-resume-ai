@@ -27,6 +27,14 @@
     padding: var(--yPaddingScale) var(--xPaddingScale);
 }
 
+.previewPageContent > :first-child {
+    margin-top: 0 !important;
+}
+
+.previewPageContent > :last-child {
+    margin-bottom: 0 !important;
+}
+
 /* Custom Scrollbar for WebKit Browsers */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;

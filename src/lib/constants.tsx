@@ -2,6 +2,8 @@
 export const fonts = {
     "Open Sans": 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap',
     "Noto Sans": 'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap',
+    "Noto Sans SC": 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap',
+    "Noto Serif SC": 'https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&display=swap',
     "Ubuntu": 'https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap',
     'Inter': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap',
     'Poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap',
@@ -18,6 +20,25 @@ export const fonts = {
 } as const;
 
 export type FontKey = keyof typeof fonts;
+
+const cjkFontFallbacks = [
+    "Noto Sans SC",
+    "Noto Serif SC",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "Source Han Sans SC",
+];
+
+const quoteFontFamily = (fontName: string) => `"${fontName.replace(/"/g, '\\"')}"`;
+
+export const getFontFamilyStack = (fontName: string) => {
+    const uniqueFonts = [fontName, ...cjkFontFallbacks].filter(
+        (value, index, array) => array.indexOf(value) === index
+    );
+
+    return `${uniqueFonts.map(quoteFontFamily).join(", ")}, sans-serif`;
+};
 
 
 export interface ThemeProps {

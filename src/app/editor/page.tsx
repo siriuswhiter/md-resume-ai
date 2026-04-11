@@ -20,6 +20,7 @@ import MobileScreenWarning from "@/components/MobileScreenWarning";
 import {
   densityPresets,
   fonts,
+  getFontFamilyStack,
   themePresetMeta,
   themes,
   type FontKey,
@@ -198,34 +199,6 @@ function EditorPageContent() {
     loadFont(fonts[font as FontKey]);
   }, [font]);
 
-  useEffect(() => {
-    const previewContainer = previewContainerRef.current;
-    if (!previewContainer) return;
-
-    previewContainer.style.setProperty("--fontName", font);
-    previewContainer.style.setProperty("--fontScale", fontScale.toString());
-    previewContainer.style.setProperty("--headingScale", headingScale.toString());
-    previewContainer.style.setProperty(
-      "--lineHeightScale",
-      lineHeightScale.toString()
-    );
-    previewContainer.style.setProperty("--xPaddingScale", `${xPaddingScale}px`);
-    previewContainer.style.setProperty("--yPaddingScale", `${yPaddingScale}px`);
-    previewContainer.style.setProperty("--headerColor", headerColor);
-    previewContainer.style.setProperty("--textColor", textColor);
-    previewContainer.style.setProperty("--linkColor", linkColor);
-  }, [
-    font,
-    fontScale,
-    headerColor,
-    headingScale,
-    lineHeightScale,
-    linkColor,
-    textColor,
-    xPaddingScale,
-    yPaddingScale,
-  ]);
-
   const handleThemeChange = useCallback(
     (selectedTheme: string) => {
       applyThemeSettings(selectedTheme);
@@ -281,7 +254,7 @@ function EditorPageContent() {
           html: exportRoot ? exportRoot.innerHTML : previewElement.innerHTML,
           theme,
           styles: {
-            fontName: font,
+            fontName: getFontFamilyStack(font),
             fontScale,
             headingScale,
             lineHeightScale,
@@ -446,7 +419,19 @@ function EditorPageContent() {
 
       <div className="mx-auto flex max-w-[1720px] flex-1 flex-col px-3 py-3 lg:min-h-0 lg:w-full lg:overflow-hidden lg:px-4">
         <div className="shrink-0 lg:hidden">
-          <MobileScreenWarning content={markdown} theme={theme} font={font} />
+          <MobileScreenWarning
+            content={markdown}
+            theme={theme}
+            font={font}
+            fontScale={fontScale}
+            headingScale={headingScale}
+            lineHeightScale={lineHeightScale}
+            xPaddingScale={xPaddingScale}
+            yPaddingScale={yPaddingScale}
+            headerColor={headerColor}
+            textColor={textColor}
+            linkColor={linkColor}
+          />
         </div>
 
         <div
@@ -511,6 +496,14 @@ function EditorPageContent() {
                       content={markdown}
                       theme={theme}
                       font={font}
+                      fontScale={fontScale}
+                      headingScale={headingScale}
+                      lineHeightScale={lineHeightScale}
+                      xPaddingScale={xPaddingScale}
+                      yPaddingScale={yPaddingScale}
+                      headerColor={headerColor}
+                      textColor={textColor}
+                      linkColor={linkColor}
                       previewContainerRef={previewContainerRef}
                       testId="editor-preview-desktop"
                       paperTestId="editor-preview-paper-desktop"

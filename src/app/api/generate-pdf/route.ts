@@ -20,6 +20,8 @@ interface PdfRequestBody {
 const fontImports = `
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
@@ -33,7 +35,6 @@ const fontImports = `
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inika:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
 `;
 
 const baseStyles = `
@@ -454,7 +455,7 @@ export async function POST(request: NextRequest) {
         ${fontImports}
 
         :root {
-            --fontName: "${styles.fontName}";
+            --fontName: ${styles.fontName};
             --fontScale: ${styles.fontScale};
             --headingScale: ${styles.headingScale};
             --lineHeightScale: ${styles.lineHeightScale};
@@ -485,7 +486,7 @@ export async function POST(request: NextRequest) {
     </style>
 </head>
 <body>
-    <div class="previewContainer theme ${theme}" style="font-family: '${styles.fontName}', sans-serif;">
+    <div class="previewContainer theme ${theme}" style="font-family: ${styles.fontName};">
         ${html}
     </div>
 </body>

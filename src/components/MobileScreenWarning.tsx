@@ -6,9 +6,29 @@ interface MobileScreenWarningProps {
     content?: string;
     theme: string;
     font: string;
+    fontScale: number;
+    headingScale: number;
+    lineHeightScale: number;
+    xPaddingScale: number;
+    yPaddingScale: number;
+    headerColor: string;
+    textColor: string;
+    linkColor: string;
 }
 
-export default function MobileScreenWarning({content, theme, font}: MobileScreenWarningProps) {
+export default function MobileScreenWarning({
+    content,
+    theme,
+    font,
+    fontScale,
+    headingScale,
+    lineHeightScale,
+    xPaddingScale,
+    yPaddingScale,
+    headerColor,
+    textColor,
+    linkColor,
+}: MobileScreenWarningProps) {
     return (
         <div className="mobile-warning space-y-4 px-4 py-5 lg:hidden">
             <div className="rounded-[28px] border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
@@ -50,6 +70,14 @@ export default function MobileScreenWarning({content, theme, font}: MobileScreen
                     content={content}
                     theme={theme}
                     font={font}
+                    fontScale={fontScale}
+                    headingScale={headingScale}
+                    lineHeightScale={lineHeightScale}
+                    xPaddingScale={xPaddingScale}
+                    yPaddingScale={yPaddingScale}
+                    headerColor={headerColor}
+                    textColor={textColor}
+                    linkColor={linkColor}
                     testId="editor-preview-mobile"
                     className="max-h-[60vh] min-h-[360px] rounded-[24px] border-slate-200 p-4"
                 />

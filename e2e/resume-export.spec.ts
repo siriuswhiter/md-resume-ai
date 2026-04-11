@@ -85,6 +85,31 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
+    test('style controls update the visible preview paper typography', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.goto('http://localhost:3001/editor?template=mashhad', { waitUntil: 'networkidle' });
+
+        const previewPaper = page.getByTestId('editor-preview-paper-desktop');
+        await expect(previewPaper).toBeVisible();
+
+        const fontSelect = page.locator('.sidebar select[aria-label="选择字体"]').first();
+        await expect(fontSelect).toBeVisible();
+        await fontSelect.selectOption('Noto Sans SC');
+        await page.evaluate(() => document.fonts.ready);
+
+        const paperFontFamily = await previewPaper
+            .locator('.previewContainer')
+            .evaluate((element) => window.getComputedStyle(element).fontFamily);
+
+        expect(paperFontFamily).toContain('Noto Sans SC');
+
+        await context.close();
+    });
+
     test('PDF export payload excludes pagination guides', async ({ browser }) => {
         const context = await browser.newContext({
             viewport: { width: 1600, height: 1200 },

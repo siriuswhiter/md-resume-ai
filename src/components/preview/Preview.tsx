@@ -1,66 +1,269 @@
 'use client';
 
-import {MutableRefObject, useEffect, useRef, useState} from "react";
+import { CSSProperties, MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
+import { getFontFamilyStack } from "@/lib/constants";
 
 const A4_PAPER_WIDTH = 794;
 const A4_PAPER_HEIGHT = 1123;
+const HEADING_TAGS = new Set(["H1", "H2", "H3", "H4", "H5", "H6"]);
+
+type ListTag = "ul" | "ol";
+
+interface MeasuredBlock {
+    html: string;
+    top: number;
+    bottom: number;
+    tagName: string;
+    listTag?: ListTag;
+}
 
 interface PreviewProps {
     content?: string;
     theme: string;
     font: string;
+    fontScale: number;
+    headingScale: number;
+    lineHeightScale: number;
+    xPaddingScale: number;
+    yPaddingScale: number;
+    headerColor: string;
+    textColor: string;
+    linkColor: string;
     previewContainerRef?: MutableRefObject<HTMLDivElement | null>;
     className?: string;
     testId?: string;
     paperTestId?: string;
 }
 
+const getNodeMetrics = (node: HTMLElement, rootRect: DOMRect) => {
+    const rect = node.getBoundingClientRect();
+    const style = window.getComputedStyle(node);
+    const marginTop = parseFloat(style.marginTop) || 0;
+    const marginBottom = parseFloat(style.marginBottom) || 0;
+
+    return {
+        top: Math.max(0, rect.top - rootRect.top - marginTop),
+        bottom: Math.max(0, rect.bottom - rootRect.top + marginBottom),
+    };
+};
+
+const collectMeasuredBlocks = (contentRoot: HTMLDivElement) => {
+    const rootRect = contentRoot.getBoundingClientRect();
+    const blocks: MeasuredBlock[] = [];
+
+    Array.from(contentRoot.children).forEach((child) => {
+        const element = child as HTMLElement;
+        const tagName = element.tagName.toUpperCase();
+
+        if ((tagName === "UL" || tagName === "OL") && element.children.length > 1) {
+            Array.from(element.children).forEach((listItem) => {
+                const item = listItem as HTMLElement;
+                const metrics = getNodeMetrics(item, rootRect);
+
+                blocks.push({
+                    html: item.outerHTML,
+                    top: metrics.top,
+                    bottom: metrics.bottom,
+                    tagName: item.tagName.toUpperCase(),
+                    listTag: tagName.toLowerCase() as ListTag,
+                });
+            });
+            return;
+        }
+
+        const metrics = getNodeMetrics(element, rootRect);
+
+        blocks.push({
+            html: element.outerHTML,
+            top: metrics.top,
+            bottom: metrics.bottom,
+            tagName,
+        });
+    });
+
+    return blocks.filter((block) => block.html.trim().length > 0);
+};
+
+const buildPageHtml = (blocks: MeasuredBlock[]) => {
+    let html = "";
+    let openListTag: ListTag | null = null;
+
+    blocks.forEach((block, index) => {
+        if (block.listTag) {
+            if (openListTag !== block.listTag) {
+                if (openListTag) {
+                    html += `</${openListTag}>`;
+                }
+                html += `<${block.listTag}>`;
+                openListTag = block.listTag;
+            }
+
+            html += block.html;
+
+            if (blocks[index + 1]?.listTag !== openListTag) {
+                html += `</${openListTag}>`;
+                openListTag = null;
+            }
+
+            return;
+        }
+
+        if (openListTag) {
+            html += `</${openListTag}>`;
+            openListTag = null;
+        }
+
+        html += block.html;
+    });
+
+    if (openListTag) {
+        html += `</${openListTag}>`;
+    }
+
+    return html;
+};
+
+const paginateBlocks = (blocks: MeasuredBlock[]) => {
+    if (blocks.length === 0) {
+        return [""];
+    }
+
+    const pages: string[] = [];
+    let currentPage: MeasuredBlock[] = [];
+    let currentPageStartTop = blocks[0].top;
+
+    blocks.forEach((block, index) => {
+        const nextBlock = blocks[index + 1];
+        const keepWithNext = HEADING_TAGS.has(block.tagName) && nextBlock;
+        const effectiveBottom = keepWithNext ? nextBlock.bottom : block.bottom;
+        const exceedsPage = effectiveBottom - currentPageStartTop > A4_PAPER_HEIGHT;
+
+        if (currentPage.length > 0 && exceedsPage) {
+            pages.push(buildPageHtml(currentPage));
+            currentPage = [];
+            currentPageStartTop = block.top;
+        }
+
+        if (currentPage.length === 0) {
+            currentPageStartTop = block.top;
+        }
+
+        currentPage.push(block);
+    });
+
+    if (currentPage.length > 0) {
+        pages.push(buildPageHtml(currentPage));
+    }
+
+    return pages.length > 0 ? pages : [""];
+};
+
 export default function Preview({
     content,
     theme,
     font,
+    fontScale,
+    headingScale,
+    lineHeightScale,
+    xPaddingScale,
+    yPaddingScale,
+    headerColor,
+    textColor,
+    linkColor,
     previewContainerRef,
     className,
     testId,
     paperTestId
 }: PreviewProps) {
     const previewShellRef = useRef<HTMLDivElement | null>(null);
-    const previewMeasureRef = useRef<HTMLDivElement | null>(null);
     const previewContentRef = useRef<HTMLDivElement | null>(null);
     const [paperScale, setPaperScale] = useState(1);
-    const [pageCount, setPageCount] = useState(1);
+    const [pages, setPages] = useState<string[]>([""]);
+
+    const previewStyles = useMemo(() => {
+        const fontStack = getFontFamilyStack(font);
+
+        return {
+            fontFamily: fontStack,
+            ["--fontName" as const]: fontStack,
+            ["--fontScale" as const]: fontScale.toString(),
+            ["--headingScale" as const]: headingScale.toString(),
+            ["--lineHeightScale" as const]: lineHeightScale.toString(),
+            ["--xPaddingScale" as const]: `${xPaddingScale}px`,
+            ["--yPaddingScale" as const]: `${yPaddingScale}px`,
+            ["--headerColor" as const]: headerColor,
+            ["--textColor" as const]: textColor,
+            ["--linkColor" as const]: linkColor,
+        } as CSSProperties;
+    }, [
+        font,
+        fontScale,
+        headingScale,
+        lineHeightScale,
+        xPaddingScale,
+        yPaddingScale,
+        headerColor,
+        textColor,
+        linkColor,
+    ]);
 
     useEffect(() => {
         const previewShell = previewShellRef.current;
-        const previewMeasure = previewMeasureRef.current;
         const previewContent = previewContentRef.current;
-        if (!previewShell || !previewMeasure || !previewContent) return;
+        if (!previewShell || !previewContent) return;
 
         const updatePaperLayout = () => {
             const nextScale = Math.min(1, (previewShell.clientWidth - 12) / A4_PAPER_WIDTH);
-            const contentHeight = Math.max(A4_PAPER_HEIGHT, previewContent.scrollHeight);
-            const nextPageCount = Math.max(1, Math.ceil(contentHeight / A4_PAPER_HEIGHT));
+            const measuredBlocks = collectMeasuredBlocks(previewContent);
+            const nextPages = paginateBlocks(measuredBlocks);
 
             setPaperScale(nextScale);
-            setPageCount(nextPageCount);
+            setPages((currentPages) => {
+                if (
+                    currentPages.length === nextPages.length &&
+                    currentPages.every((page, index) => page === nextPages[index])
+                ) {
+                    return currentPages;
+                }
+
+                return nextPages;
+            });
         };
 
-        const shellObserver = new ResizeObserver(updatePaperLayout);
+        const scheduleLayoutUpdate = () => {
+            window.requestAnimationFrame(updatePaperLayout);
+        };
+
+        const shellObserver = new ResizeObserver(scheduleLayoutUpdate);
         const contentObserver = new ResizeObserver(updatePaperLayout);
 
         shellObserver.observe(previewShell);
-        shellObserver.observe(previewMeasure);
         contentObserver.observe(previewContent);
         updatePaperLayout();
+        if ("fonts" in document) {
+            void document.fonts.ready.then(scheduleLayoutUpdate);
+        }
 
         return () => {
             shellObserver.disconnect();
             contentObserver.disconnect();
         };
-    }, [content, font, theme]);
+    }, [
+        content,
+        font,
+        theme,
+        fontScale,
+        headingScale,
+        lineHeightScale,
+        xPaddingScale,
+        yPaddingScale,
+        headerColor,
+        textColor,
+        linkColor,
+    ]);
 
     return (
         <div
@@ -77,21 +280,17 @@ export default function Preview({
             >
                 <div
                     ref={(node) => {
-                        previewMeasureRef.current = node;
                         if (previewContainerRef) {
                             previewContainerRef.current = node;
                         }
                     }}
                     className={`previewContainer theme prose max-w-none text-[#1c2024] ${theme?.toLowerCase()}`}
                     style={{
-                        fontFamily: font,
+                        ...previewStyles,
                         width: `${A4_PAPER_WIDTH}px`,
                         minHeight: `${A4_PAPER_HEIGHT}px`,
                     }}
                 >
-                    {pageCount > 1 ? (
-                      <div className="pointer-events-none absolute inset-0 z-10" />
-                    ) : null}
                     <div ref={previewContentRef} data-preview-content-root>
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                     </div>
@@ -103,7 +302,7 @@ export default function Preview({
                     className="flex w-full flex-col items-center gap-4"
                     style={{ maxWidth: `${A4_PAPER_WIDTH * paperScale}px` }}
                 >
-                    {Array.from({ length: pageCount }, (_, index) => {
+                    {pages.map((pageHtml, index) => {
                         const isFirstPage = index === 0;
 
                         return (
@@ -119,7 +318,7 @@ export default function Preview({
                                 <div
                                     className={`previewContainer theme relative overflow-hidden rounded-[18px] border border-slate-200 bg-white prose max-w-none text-[#1c2024] shadow-[0_20px_48px_rgba(15,23,42,0.14)] ${theme?.toLowerCase()}`}
                                     style={{
-                                        fontFamily: font,
+                                        ...previewStyles,
                                         width: `${A4_PAPER_WIDTH}px`,
                                         height: `${A4_PAPER_HEIGHT}px`,
                                         minHeight: `${A4_PAPER_HEIGHT}px`,
@@ -133,13 +332,8 @@ export default function Preview({
                                             <span>Page {index + 1}</span>
                                         </div>
                                     ) : null}
-                                    <div className="relative h-full overflow-hidden">
-                                        <div
-                                            className="absolute inset-x-0 top-0"
-                                            style={{ transform: `translateY(-${index * A4_PAPER_HEIGHT}px)` }}
-                                        >
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-                                        </div>
+                                    <div className="previewPageContent relative h-full overflow-hidden">
+                                        <div dangerouslySetInnerHTML={{ __html: pageHtml }} />
                                     </div>
                                 </div>
                             </div>
