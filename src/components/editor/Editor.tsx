@@ -16,7 +16,7 @@ const EditorComponent = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className={cn("editor relative h-full custom-scrollbar overflow-auto rounded-[28px] border border-slate-200 bg-white flex items-center justify-center")}>
+            <div className={cn("editor relative flex h-full items-center justify-center overflow-auto rounded-[28px] border border-slate-200 bg-white custom-scrollbar overscroll-contain")}>
                 <span className="text-sm text-slate-400">正在加载编辑器...</span>
             </div>
         )

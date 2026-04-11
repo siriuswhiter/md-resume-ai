@@ -38,7 +38,7 @@ export default function EditorInner({markdown, onChangeAction, className}: Edito
     };
 
     return (
-        <div className={cn("editor relative h-full custom-scrollbar overflow-auto rounded-[28px] border border-slate-200 bg-white", className)}>
+        <div className={cn("editor relative h-full overflow-auto rounded-[28px] border border-slate-200 bg-white custom-scrollbar overscroll-contain", className)}>
             <MDXEditor
                 ref={editorRef}
                 markdown={markdown ?? ''}

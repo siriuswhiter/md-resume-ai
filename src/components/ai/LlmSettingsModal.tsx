@@ -40,6 +40,12 @@ export function LlmSettingsModal({
         <div className="mt-3 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs leading-6 text-sky-800">
           配置项会即时保存。推荐优先使用服务端 Key，其次才是浏览器本地 Key。
         </div>
+        {!settings.useServerRoute && (
+          <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs leading-6 text-amber-800">
+            浏览器直连模式会直接向上游发送请求；如果未携带 `Authorization` 请求头，上游通常会返回
+            `401 Missing Authentication header`。
+          </div>
+        )}
         <div className="mt-4 space-y-3">
           <label className="flex cursor-pointer items-center gap-2">
             <input

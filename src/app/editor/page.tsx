@@ -369,28 +369,53 @@ function EditorPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.10),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-white/60 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1720px] items-center gap-3 px-3 py-3 lg:px-4">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.10),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] text-slate-900 lg:flex lg:h-screen lg:flex-col lg:overflow-hidden">
+      <header className="shrink-0 border-b border-white/60 bg-white/78 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1720px] flex-wrap items-center gap-2 px-3 py-2 lg:px-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
           >
             <FilePenLine className="h-4 w-4 text-sky-600" />
             Markdown Resume AI
           </Link>
 
-          <div className="hidden min-[880px]:block">
-            <p className="text-sm font-semibold text-slate-900">{resumeTitle}</p>
-            <p className="text-xs text-slate-500">
-              {documentStatus} · {aiStatus}
-            </p>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <p className="max-w-full truncate text-sm font-semibold text-slate-900">
+                {resumeTitle}
+              </p>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+                {documentStatus}
+              </span>
+              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
+                {aiStatus}
+              </span>
+              <span className="hidden rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-medium text-sky-700 min-[960px]:inline-flex">
+                <span className="inline-flex items-center gap-1.5">
+                  <Layers3 className="h-3.5 w-3.5" />
+                  {themePresetMeta[activeThemeKey].label}
+                </span>
+              </span>
+            </div>
+            <div className="mt-1 hidden flex-wrap items-center gap-2 text-[11px] text-slate-500 xl:flex">
+              <span className="truncate">{structureHint}</span>
+              {compactStats.map((item) => (
+                <span
+                  key={item.label}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 font-medium text-slate-600"
+                >
+                  <span className="text-slate-900">{item.value}</span>
+                  {item.label}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:inline-flex min-[1380px]:hidden"
+              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:inline-flex min-[1380px]:hidden"
               onClick={() => setDrawerOpen(true)}
             >
               <PanelRight className="h-4 w-4" />
@@ -399,7 +424,7 @@ function EditorPageContent() {
 
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
               onClick={handleExportPdf}
               disabled={isExporting}
             >
@@ -419,14 +444,14 @@ function EditorPageContent() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-[1720px] px-3 py-3 lg:px-4">
-        <div className="lg:hidden">
+      <div className="mx-auto flex max-w-[1720px] flex-1 flex-col px-3 py-3 lg:min-h-0 lg:px-4">
+        <div className="shrink-0 lg:hidden">
           <MobileScreenWarning content={markdown} theme={theme} font={font} />
         </div>
 
         <div
           data-testid="editor-workspace-desktop"
-          className="hidden h-[calc(100vh-5rem)] min-h-[760px] lg:flex lg:flex-col lg:gap-3"
+          className="hidden min-h-0 flex-1 lg:flex lg:flex-col lg:gap-3 lg:overflow-hidden"
         >
           {feedback ? (
             <div
@@ -442,51 +467,11 @@ function EditorPageContent() {
             </div>
           ) : null}
 
-          <div
-            data-testid="editor-summary-strip"
-            className="rounded-[20px] border border-slate-200 bg-white/85 px-4 py-2.5 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur"
-          >
-            <div className="flex flex-wrap items-center gap-2 xl:justify-between">
-              <div className="flex min-w-0 flex-wrap items-center gap-2">
-                <p className="max-w-full truncate text-sm font-semibold text-slate-900">
-                  {resumeTitle}
-                </p>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                  {documentStatus}
-                </span>
-                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-                  {aiStatus}
-                </span>
-                <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Layers3 className="h-3.5 w-3.5" />
-                    当前主题：{themePresetMeta[activeThemeKey].label}
-                  </span>
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-                  {structureHint}
-                </span>
-                {compactStats.map((item) => (
-                  <span
-                    key={item.label}
-                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
-                  >
-                    <span className="text-slate-900">{item.value}</span>
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex min-h-0 flex-1 gap-3 min-[1380px]:items-start">
-            <div className="min-w-0 flex-1">
+          <div className="flex min-h-0 flex-1 gap-3 min-[1380px]:items-start lg:overflow-hidden">
+            <div className="min-w-0 flex-1 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <section className="flex min-h-0 flex-col rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                  <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
                         Markdown 编辑区
@@ -508,8 +493,8 @@ function EditorPageContent() {
                   />
                 </section>
 
-                <section className="flex min-h-0 flex-col rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                  <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
                         实时预览
@@ -532,7 +517,7 @@ function EditorPageContent() {
               </div>
             </div>
 
-            <aside className="hidden w-[320px] shrink-0 min-[1380px]:block">
+            <aside className="hidden h-full min-h-0 w-[320px] shrink-0 min-[1380px]:block">
               <Sidebar
                 variant="inline"
                 onThemeChange={handleThemeChange}

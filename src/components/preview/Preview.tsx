@@ -67,7 +67,7 @@ export default function Preview({
             data-testid={testId}
             ref={previewShellRef}
             className={cn(
-                "relative h-full overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] sm:p-3",
+                "relative h-full overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] overscroll-contain sm:p-3",
                 className
             )}
         >
