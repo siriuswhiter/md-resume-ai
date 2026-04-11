@@ -1,3 +1,30 @@
 .mdxeditor-toolbar {
     display: none;
 }
+
+.editor .mdxeditor {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+}
+
+.editor .mdxeditor-diff-source-wrapper,
+.editor .mdxeditor-rich-text-editor,
+.editor .mdxeditor-root-contenteditable {
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.editor .mdxeditor-root-contenteditable {
+    overflow: auto;
+}
+
+.editor .mdxeditor-source-editor,
+.editor .cm-editor,
+.editor .cm-scroller {
+    height: 100%;
+}
+
+.editor .cm-scroller {
+    overflow: auto;
+}

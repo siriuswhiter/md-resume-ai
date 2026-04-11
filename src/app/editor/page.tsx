@@ -444,7 +444,7 @@ function EditorPageContent() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1720px] flex-1 flex-col px-3 py-3 lg:min-h-0 lg:px-4">
+      <div className="mx-auto flex max-w-[1720px] flex-1 flex-col px-3 py-3 lg:min-h-0 lg:w-full lg:overflow-hidden lg:px-4">
         <div className="shrink-0 lg:hidden">
           <MobileScreenWarning content={markdown} theme={theme} font={font} />
         </div>
@@ -467,10 +467,10 @@ function EditorPageContent() {
             </div>
           ) : null}
 
-          <div className="flex min-h-0 flex-1 gap-3 min-[1380px]:items-start lg:overflow-hidden">
-            <div className="min-w-0 flex-1 overflow-hidden">
+          <div className="grid min-h-0 flex-1 gap-3 min-[1380px]:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
+            <div className="min-w-0 min-h-0 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
@@ -486,14 +486,16 @@ function EditorPageContent() {
                       </span>
                     </div>
                   </div>
-                  <Editor
-                    markdown={markdown}
-                    onChangeAction={updateMarkdown}
-                    className="min-h-0 flex-1"
-                  />
+                  <div className="min-h-0 overflow-hidden">
+                    <Editor
+                      markdown={markdown}
+                      onChangeAction={updateMarkdown}
+                      className="h-full min-h-0"
+                    />
+                  </div>
                 </section>
 
-                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-900">
@@ -504,20 +506,22 @@ function EditorPageContent() {
                       A4 分页预览
                     </div>
                   </div>
-                  <Preview
-                    content={markdown}
-                    theme={theme}
-                    font={font}
-                    previewContainerRef={previewContainerRef}
-                    testId="editor-preview-desktop"
-                    paperTestId="editor-preview-paper-desktop"
-                    className="min-h-0 flex-1"
-                  />
+                  <div className="min-h-0 overflow-hidden">
+                    <Preview
+                      content={markdown}
+                      theme={theme}
+                      font={font}
+                      previewContainerRef={previewContainerRef}
+                      testId="editor-preview-desktop"
+                      paperTestId="editor-preview-paper-desktop"
+                      className="h-full min-h-0"
+                    />
+                  </div>
                 </section>
               </div>
             </div>
 
-            <aside className="hidden h-full min-h-0 w-[320px] shrink-0 min-[1380px]:block">
+            <aside className="hidden h-full min-h-0 w-[320px] overflow-hidden min-[1380px]:block">
               <Sidebar
                 variant="inline"
                 onThemeChange={handleThemeChange}
