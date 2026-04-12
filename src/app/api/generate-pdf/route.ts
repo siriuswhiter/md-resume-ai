@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import { buildManagedPreviewCss } from '@/lib/previewStyleGuards';
 
 interface PdfRequestBody {
     html: string;
@@ -446,7 +447,10 @@ export async function POST(request: NextRequest) {
     try {
         const body: PdfRequestBody = await request.json();
         const { html, theme, styles } = body;
-        const escapedCustomCss = (styles.customCss ?? "").replace(/<\/style/gi, "<\\/style");
+        const escapedCustomCss = buildManagedPreviewCss(styles.customCss).replace(
+            /<\/style/gi,
+            "<\\/style"
+        );
 
         const fullHtml = `
 <!DOCTYPE html>

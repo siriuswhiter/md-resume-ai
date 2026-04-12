@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
 import { getFontFamilyStack } from "@/lib/constants";
+import { buildManagedPreviewCss } from "@/lib/previewStyleGuards";
 
 const A4_PAPER_WIDTH = 794;
 const A4_PAPER_HEIGHT = 1123;
@@ -212,6 +213,11 @@ export default function Preview({
         linkColor,
     ]);
 
+    const managedCustomCss = useMemo(
+        () => buildManagedPreviewCss(customCss),
+        [customCss]
+    );
+
     useEffect(() => {
         const previewShell = previewShellRef.current;
         const previewContent = previewContentRef.current;
@@ -277,9 +283,7 @@ export default function Preview({
                 className
             )}
         >
-            {customCss?.trim() ? (
-                <style data-preview-custom-style>{customCss}</style>
-            ) : null}
+            <style data-preview-custom-style>{managedCustomCss}</style>
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute left-[-99999px] top-0 opacity-0"

@@ -111,6 +111,71 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
+    test('managed preview styles keep font and page padding controls effective over custom CSS', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.addInitScript(() => {
+            window.localStorage.setItem('FONT', JSON.stringify('Noto Sans SC'));
+            window.localStorage.setItem('FONT_SCALE', JSON.stringify(1.25));
+            window.localStorage.setItem('HEADING_SCALE', JSON.stringify(1.2));
+            window.localStorage.setItem('LINE_HEIGHT_SCALE', JSON.stringify(1.7));
+            window.localStorage.setItem('X_PADDING_SCALE', JSON.stringify(36));
+            window.localStorage.setItem(
+                'CUSTOM_PREVIEW_CSS',
+                JSON.stringify(`
+.previewContainer {
+  padding: 0 !important;
+}
+
+.previewContainer,
+.previewContainer * {
+  font-family: Georgia, serif !important;
+}
+
+.previewContainer h1,
+.previewContainer h2,
+.previewContainer h3,
+.previewContainer p,
+.previewContainer li {
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+`)
+            );
+        });
+
+        await page.goto('http://localhost:3001/editor?template=mashhad', { waitUntil: 'networkidle' });
+
+        const previewContainer = page.getByTestId('editor-preview-paper-desktop').locator('.previewContainer');
+        await expect(previewContainer).toBeVisible();
+
+        const previewMetrics = await previewContainer.evaluate((element) => {
+            const containerStyle = window.getComputedStyle(element);
+            const headingStyle = window.getComputedStyle(element.querySelector('h1') as HTMLElement);
+            const paragraphStyle = window.getComputedStyle(element.querySelector('p') as HTMLElement);
+
+            return {
+                fontFamily: containerStyle.fontFamily,
+                paddingLeft: containerStyle.paddingLeft,
+                headingFontSize: headingStyle.fontSize,
+                paragraphFontSize: paragraphStyle.fontSize,
+                paragraphLineHeight: paragraphStyle.lineHeight,
+            };
+        });
+
+        expect(previewMetrics.fontFamily).toContain('Noto Sans SC');
+        expect(previewMetrics.fontFamily).not.toContain('Georgia');
+        expect(previewMetrics.paddingLeft).toBe('36px');
+        expect(previewMetrics.headingFontSize).not.toBe('12px');
+        expect(previewMetrics.paragraphFontSize).not.toBe('12px');
+        expect(previewMetrics.paragraphLineHeight).not.toBe('12px');
+
+        await context.close();
+    });
+
     test('PDF export payload excludes pagination guides', async ({ browser }) => {
         const context = await browser.newContext({
             viewport: { width: 1600, height: 1200 },

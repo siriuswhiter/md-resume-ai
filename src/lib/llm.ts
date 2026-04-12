@@ -42,6 +42,105 @@ function buildAuthErrorMessage(settings: LlmSettings, detail: string): string {
   return `API 401: ${detail}。当前为浏览器直连模式，请在“配置 AI”中填写有效 API Key，或切换到服务端 Key（/api/llm/chat）。`;
 }
 
+type CssValidationIssue = {
+  selector: string;
+  property: string;
+  message: string;
+};
+
+function stripCssComments(css: string): string {
+  return css.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+function isRootPreviewSelector(selector: string): boolean {
+  const normalized = selector.trim();
+  return normalized === ".previewContainer" || /^\.previewContainer(?:\.|:|\[)/.test(normalized);
+}
+
+function validateGeneratedPreviewCss(css: string): CssValidationIssue | null {
+  const sanitizedCss = stripCssComments(css);
+
+  if (/@(?:import|font-face)\b/i.test(sanitizedCss)) {
+    return {
+      selector: "@rule",
+      property: "@import",
+      message: "不要引入外部字体或额外资源。",
+    };
+  }
+
+  const blockRegex = /([^{}]+)\{([^{}]*)\}/g;
+  for (const match of sanitizedCss.matchAll(blockRegex)) {
+    const selectorText = match[1]?.trim() ?? "";
+    const declarationText = match[2] ?? "";
+    if (!selectorText || selectorText.startsWith("@")) continue;
+
+    const selectors = selectorText.split(",").map((selector) => selector.trim());
+    if (selectors.some((selector) => !selector.includes(".previewContainer"))) {
+      return {
+        selector: selectorText,
+        property: "selector",
+        message: "所有选择器都必须限定在 .previewContainer 下。",
+      };
+    }
+
+    const declarationRegex = /([a-z-]+)\s*:\s*([^;]+);?/gi;
+    for (const declaration of declarationText.matchAll(declarationRegex)) {
+      const property = declaration[1]?.trim().toLowerCase() ?? "";
+      const value = declaration[2]?.trim() ?? "";
+      if (!property) continue;
+
+      if (property === "font-family") {
+        return {
+          selector: selectorText,
+          property,
+          message: "不要覆盖字体，字体由右侧样式控制统一管理。",
+        };
+      }
+
+      if (
+        property === "font-size" &&
+        !value.includes("var(--fontScale)") &&
+        !value.includes("var(--headingScale)")
+      ) {
+        return {
+          selector: selectorText,
+          property,
+          message: "字号必须跟随 var(--fontScale) 或 var(--headingScale)。",
+        };
+      }
+
+      if (property === "line-height" && !value.includes("var(--lineHeightScale)")) {
+        return {
+          selector: selectorText,
+          property,
+          message: "行高必须跟随 var(--lineHeightScale)。",
+        };
+      }
+
+      if (
+        selectors.some((selector) => isRootPreviewSelector(selector)) &&
+        [
+          "padding",
+          "padding-left",
+          "padding-right",
+          "padding-top",
+          "padding-bottom",
+          "font-size",
+          "line-height",
+        ].includes(property)
+      ) {
+        return {
+          selector: selectorText,
+          property,
+          message: "不要覆盖预览容器的页边距、字号或行高，这些由右侧样式控制统一管理。",
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
 const MARKDOWN_RESUME_SYSTEM = `你是资深猎头、招聘经理与简历顾问。用户会粘贴**任意格式**的原始文本（中文为主），其中可能包含口语化表述、流水账、顺序混乱、重复信息、无关细节。
 
 你的任务：**不要机械照抄原文，也不要完全按照原始输入顺序组织内容。你需要先提炼重点，再重写成一份更专业、更适合投递的 Markdown 简历。**
@@ -92,12 +191,16 @@ const STYLE_ASSISTANT_SYSTEM = `你是资深前端样式工程师，负责为 Ma
 - 页面内容渲染在 .previewContainer 内。
 - 常见元素包括：h1, h2, h3, p, ul, ol, li, a, strong, em, hr。
 - 允许使用 CSS 变量：var(--headerColor), var(--textColor), var(--linkColor), var(--fontScale), var(--headingScale), var(--lineHeightScale), var(--xPaddingScale), var(--yPaddingScale)。
+- 用户会在编辑器右侧继续调整字体、字号、行距、标题倍率与页边距，这些控件必须保持有效。
 
 【输出要求】
 - 只输出一个 JSON 对象，仅包含字段：name, css, summary。
 - css 必须是可直接粘贴的纯 CSS，不要包含 \`\`\` 代码围栏，不要带解释。
 - 所有选择器必须限定在 .previewContainer 下，避免污染页面其他区域。
 - 不要使用 @import，不要依赖外部资源，不要编造不存在的类名。
+- 不要输出任何 font-family 声明；字体始终由右侧样式控制决定。
+- 不要覆盖 .previewContainer 的 padding、font-size、line-height，避免破坏用户的字体与页边距设置。
+- 若需要调整字号、标题层级或行高，必须显式使用 var(--fontScale)、var(--headingScale)、var(--lineHeightScale) 参与计算，而不是写死固定值。
 - 以可维护、克制、适合简历打印与 PDF 导出为优先。
 - 若用户要求与当前 CSS 合并，请在此基础上增量修改，而不是完全推翻。
 `;
@@ -203,6 +306,15 @@ export async function generatePreviewCssTemplate(
     request: string;
     theme: string;
     currentCss?: string;
+    font: string;
+    fontScale: number;
+    headingScale: number;
+    lineHeightScale: number;
+    xPaddingScale: number;
+    yPaddingScale: number;
+    headerColor: string;
+    textColor: string;
+    linkColor: string;
   }
 ): Promise<GeneratedStyleTemplate> {
   if (!settings.useServerRoute && !settings.apiKey.trim()) {
@@ -228,6 +340,17 @@ export async function generatePreviewCssTemplate(
 
 当前主题：${input.theme}
 
+当前编辑器控制项：
+- 字体：${input.font}
+- 正文字号倍率：${input.fontScale}
+- 标题倍率：${input.headingScale}
+- 行距倍率：${input.lineHeightScale}
+- 左右边距：${input.xPaddingScale}px
+- 上下边距：${input.yPaddingScale}px
+- 标题颜色：${input.headerColor}
+- 正文颜色：${input.textColor}
+- 链接颜色：${input.linkColor}
+
 当前已有 CSS：
 -----
 ${input.currentCss?.trim() || "(空)"}
@@ -236,7 +359,9 @@ ${input.currentCss?.trim() || "(空)"}
 用户需求：
 -----
 ${input.request.trim()}
------`,
+-----
+
+请确保用户后续继续调整上述控制项时，生成的 CSS 仍会跟随变化。`,
       },
     ],
   };
@@ -299,6 +424,12 @@ ${input.request.trim()}
   if (!css) throw new Error("样式助手未返回有效 CSS");
   if (!css.includes(".previewContainer")) {
     throw new Error("样式助手返回的 CSS 未限定在 .previewContainer 下，已拒绝应用");
+  }
+  const validationIssue = validateGeneratedPreviewCss(css);
+  if (validationIssue) {
+    throw new Error(
+      `样式助手返回的 CSS 已拒绝应用：${validationIssue.message}（${validationIssue.selector} -> ${validationIssue.property}）`
+    );
   }
 
   return {

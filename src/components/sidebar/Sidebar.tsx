@@ -399,6 +399,15 @@ export default function Sidebar({
             llmSettings={llmSettings}
             onMarkdownGenerated={onMarkdownGenerated}
             theme={theme}
+            font={font}
+            fontScale={fontScale}
+            headingScale={headingScale}
+            lineHeightScale={lineHeightScale}
+            xPaddingScale={xPaddingScale}
+            yPaddingScale={yPaddingScale}
+            headerColor={headerColor}
+            textColor={textColor}
+            linkColor={linkColor}
             customCss={customCss}
             onCustomCssChange={onCustomCssChange}
             stylePrompt={stylePrompt}

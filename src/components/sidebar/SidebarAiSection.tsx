@@ -32,6 +32,15 @@ type Props = {
   llmSettings: LlmSettings;
   onMarkdownGenerated: (md: string) => void;
   theme: string;
+  font: string;
+  fontScale: number;
+  headingScale: number;
+  lineHeightScale: number;
+  xPaddingScale: number;
+  yPaddingScale: number;
+  headerColor: string;
+  textColor: string;
+  linkColor: string;
   customCss: string;
   onCustomCssChange: (css: string) => void;
   stylePrompt: string;
@@ -52,6 +61,15 @@ export function SidebarAiSection({
   llmSettings,
   onMarkdownGenerated,
   theme,
+  font,
+  fontScale,
+  headingScale,
+  lineHeightScale,
+  xPaddingScale,
+  yPaddingScale,
+  headerColor,
+  textColor,
+  linkColor,
   customCss,
   onCustomCssChange,
   stylePrompt,
@@ -148,6 +166,15 @@ export function SidebarAiSection({
         request: stylePrompt,
         theme,
         currentCss: customCss,
+        font,
+        fontScale,
+        headingScale,
+        lineHeightScale,
+        xPaddingScale,
+        yPaddingScale,
+        headerColor,
+        textColor,
+        linkColor,
       });
       onCustomCssChange(template.css);
       setGeneratedTemplate(template);
@@ -183,51 +210,17 @@ export function SidebarAiSection({
     setStyleSuccess(`样式模板“${finalName}”已保存到本地浏览器。`);
   };
 
-  const resumeStepCards = [
-    {
-      title: "1. 粘贴原始经历",
-      description: "把零散信息贴进来，不需要提前整理格式。",
-      active: rawInput.trim().length > 0,
-    },
-    {
-      title: "2. 生成 Markdown 草稿",
-      description: "AI 会整理为更适合投递的结构化简历正文。",
-      active: resumeLoading,
-    },
-    {
-      title: "3. 写入编辑器并精修",
-      description: "结果会直接进入左侧编辑区，便于继续人工调整。",
-      active: Boolean(resumeSuccess),
-    },
-  ];
-
   return (
     <>
       <div className="space-y-4">
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-          <div className="flex items-start gap-3">
+        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
                 <Sparkles className="h-3.5 w-3.5" />
                 AI 助手
               </div>
-              <h3 className="mt-3 text-base font-semibold text-slate-900">
-                简历草稿与样式调校共用同一套模型配置
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Key 与模型配置已移到页面右上角。这里仅保留生成与应用，不再承担配置职责。
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">简历草稿助手</p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                把原始材料整理成 Markdown 简历初稿。
-              </p>
+              <p className="mt-3 text-sm font-semibold text-slate-900">简历草稿</p>
             </div>
             <button
               type="button"
@@ -238,24 +231,6 @@ export function SidebarAiSection({
               <Maximize2 className="h-3.5 w-3.5" />
               放大
             </button>
-          </div>
-
-          <div className="mb-4 grid gap-3">
-            {resumeStepCards.map((step) => (
-              <div
-                key={step.title}
-                className={`rounded-2xl border px-3 py-3 transition ${
-                  step.active
-                    ? "border-sky-300 bg-sky-50"
-                    : "border-slate-200 bg-slate-50"
-                }`}
-              >
-                <p className="text-sm font-medium text-slate-900">{step.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
-                  {step.description}
-                </p>
-              </div>
-            ))}
           </div>
 
           <textarea
@@ -318,9 +293,6 @@ export function SidebarAiSection({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">样式助手</p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                用自然语言生成作用于 `.previewContainer` 的 CSS，并保存为本地模板。
-              </p>
             </div>
           </div>
 
@@ -359,14 +331,9 @@ export function SidebarAiSection({
           </div>
 
           <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                保存当前样式
-              </p>
-              <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600">
-                当前 CSS {customCss.trim() ? `${customCss.length} 字` : "为空"}
-              </span>
-            </div>
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+              保存当前样式
+            </p>
             <input
               type="text"
               value={templateName}
@@ -383,11 +350,6 @@ export function SidebarAiSection({
               >
                 保存为本地模板
               </Button>
-              {generatedTemplate?.summary ? (
-                <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs text-slate-500">
-                  {generatedTemplate.summary}
-                </span>
-              ) : null}
             </div>
           </div>
 
