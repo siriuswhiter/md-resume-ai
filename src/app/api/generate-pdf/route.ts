@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import { PDF_PAPER_FORMAT } from '@/lib/constants';
 import { buildManagedPreviewCss } from '@/lib/previewStyleGuards';
 
 interface PdfRequestBody {
@@ -54,6 +55,11 @@ body {
     font-family: var(--fontName, "Open Sans"), sans-serif;
     padding: var(--yPaddingScale) var(--xPaddingScale);
     background: white;
+}
+
+.previewContainer > * {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
 }
 
 /* Prose-like defaults */
@@ -480,8 +486,8 @@ export async function POST(request: NextRequest) {
         ${escapedCustomCss}
 
         @page {
-            margin: 24px 0;
-            size: letter;
+            margin: 0;
+            size: ${PDF_PAPER_FORMAT};
         }
 
         @media print {
@@ -513,7 +519,8 @@ export async function POST(request: NextRequest) {
         await page.evaluate(() => document.fonts.ready);
 
         const pdf = await page.pdf({
-            format: 'letter',
+            format: PDF_PAPER_FORMAT,
+            preferCSSPageSize: true,
             printBackground: true,
             margin: {
                 top: '0',

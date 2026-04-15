@@ -19,6 +19,10 @@ export const fonts = {
     "Lato": 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap'
 } as const;
 
+export const A4_PAPER_WIDTH_PX = 794;
+export const A4_PAPER_HEIGHT_PX = 1123;
+export const PDF_PAPER_FORMAT = "A4";
+
 export type FontKey = keyof typeof fonts;
 
 const cjkFontFallbacks = [

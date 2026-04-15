@@ -4,11 +4,11 @@ import { CSSProperties, MutableRefObject, useEffect, useMemo, useRef, useState }
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
-import { getFontFamilyStack } from "@/lib/constants";
+import { A4_PAPER_HEIGHT_PX, A4_PAPER_WIDTH_PX, getFontFamilyStack } from "@/lib/constants";
 import { buildManagedPreviewCss } from "@/lib/previewStyleGuards";
 
-const A4_PAPER_WIDTH = 794;
-const A4_PAPER_HEIGHT = 1123;
+const A4_PAPER_WIDTH = A4_PAPER_WIDTH_PX;
+const A4_PAPER_HEIGHT = A4_PAPER_HEIGHT_PX;
 const HEADING_TAGS = new Set(["H1", "H2", "H3", "H4", "H5", "H6"]);
 
 type ListTag = "ul" | "ol";
