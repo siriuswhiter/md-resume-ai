@@ -174,7 +174,18 @@ const MARKDOWN_RESUME_SYSTEM = `你是资深猎头、招聘经理与简历顾问
 
 【版式要求】
 - 使用标准 GitHub Flavored Markdown：标题用 # / ## / ###，列表用 - 或 1.，强调用 **bold** 与 *italic*。
-- 不要输出 HTML；不要输出 \`\`\` 代码围栏包裹全文；不要输出解释文字。
+- 正文默认使用 Markdown，不要把整份简历写成 HTML。
+- 仅当头部联系方式较多、且左右分布能明显提升可读性时，允许在文档最开头使用**受限 HTML**实现头部布局；除头部外，其余内容仍优先使用 Markdown。
+- 受限 HTML 仅允许这些标签：div、section、header、span、p、br、a、strong、em、h1、h2、h3、ul、ol、li、hr。
+- 受限 HTML 仅允许这些 class：resume-header、resume-header-main、resume-header-side、resume-inline、resume-stack、resume-meta、resume-tag-list、resume-tag。
+- 不要输出任何内联 style、script、事件属性，或上述白名单之外的标签、属性、class。
+- 若使用受限 HTML 头部，可参考这个最小示例：
+  <div class="resume-header">
+    <div class="resume-header-main"><h1>张三</h1><p>算法工程师</p></div>
+    <div class="resume-header-side resume-stack"><p>138xxxxxx</p><p>zhangsan@email.com</p><p>北京</p></div>
+  </div>
+- 若用户材料不需要特殊头部布局，直接输出纯 Markdown 即可。
+- 不要输出 \`\`\` 代码围栏包裹全文；不要输出解释文字。
 - 简历结构清晰，优先生成适合单页或双页简历的紧凑表达。
 
 【输出格式】
@@ -184,14 +195,16 @@ body_markdown 为完整 Markdown 正文，可按用户输入按需组织，例�
 2) 一行联系方式（手机 · 邮箱 · 城市）
 3) 按需补充：## 教育经历 / ## 工作经历 / ## 实习经历 / ## 科研经历 / ## 项目经历
 4) 按需补充：## 技能 / ## 证书 / ## 获奖 / ## 校园经历 / ## 其他与输入内容直接相关的章节
+若确实需要更清晰的头部对齐，也可在最开头改为受限 HTML 头部，后续章节继续用 Markdown。
 
 【重要】
 - 允许你重组章节顺序，以突出最有竞争力的信息。
 - 不要默认生成“个人摘要”或类似概述段落。
 - 不要生成与用户输入无关的章节，也不要输出空章节。
+- 不要滥用 HTML；只有头部信息排布明显受益时才使用受限 HTML。
 - body_markdown 中若含双引号，需保证 JSON 合法。`;
 
-const MD_USER_INSTRUCTION = `请从用户粘贴的原始材料中提炼重点，按内容类型按需组织简历模块，并把项目/经历按更专业、结果导向、符合 STAR 思路的简历语言重写。不要默认生成个人摘要或为凑结构补齐无关章节。输出 JSON（仅字段 body_markdown）：`;
+const MD_USER_INSTRUCTION = `请从用户粘贴的原始材料中提炼重点，按内容类型按需组织简历模块，并把项目/经历按更专业、结果导向、符合 STAR 思路的简历语言重写。不要默认生成个人摘要或为凑结构补齐无关章节。正文默认用 Markdown；只有头部确实需要左右布局时，才有限使用受限 HTML。输出 JSON（仅字段 body_markdown）：`;
 
 const STYLE_ASSISTANT_SYSTEM = `你是资深前端样式工程师，负责为 Markdown 简历预览生成可直接使用的 CSS。
 

@@ -2,10 +2,13 @@
 
 import { CSSProperties, MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
 import { A4_PAPER_HEIGHT_PX, A4_PAPER_WIDTH_PX, getFontFamilyStack } from "@/lib/constants";
 import { buildManagedPreviewCss } from "@/lib/previewStyleGuards";
+import { restrictedResumeHtmlSchema } from "@/lib/restrictedHtml";
 
 const A4_PAPER_WIDTH = A4_PAPER_WIDTH_PX;
 const A4_PAPER_HEIGHT = A4_PAPER_HEIGHT_PX;
@@ -302,7 +305,15 @@ export default function Preview({
                     }}
                 >
                     <div ref={previewContentRef} data-preview-content-root>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[
+                          rehypeRaw,
+                          [rehypeSanitize, restrictedResumeHtmlSchema],
+                        ]}
+                      >
+                        {content}
+                      </ReactMarkdown>
                     </div>
                 </div>
             </div>
