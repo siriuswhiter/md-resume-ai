@@ -16,6 +16,8 @@ import PageFooter from "@/components/PageFooter";
 import PageHeader from "@/components/PageHeader";
 import { ThemeList } from "@/lib/constants";
 import type { BlogPost } from "@/app/blog/utils";
+import { cn } from "@/lib/utils";
+import { siteMono, siteSans } from "@/lib/siteFonts";
 
 type Language = "en" | "zh";
 
@@ -25,6 +27,14 @@ interface HomePageClientProps {
 
 const STORAGE_KEY = "homepage-language";
 const primaryTemplates = Object.keys(ThemeList).slice(0, 4);
+const clayShadow =
+  "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
+const clayButton =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-black px-6 py-3.5 text-sm font-medium transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:shadow-[-7px_7px_0_#000000]";
+const monoLabel = cn(
+  siteMono.className,
+  "text-[11px] font-normal uppercase tracking-[0.28em]"
+);
 
 const copy = {
   en: {
@@ -32,7 +42,7 @@ const copy = {
     languageLabel: "Language",
     githubLabel: "GitHub",
     heroBadge: "AI drafting, template switching, and PDF export in one workspace",
-    heroTitle: "Build a resume that looks deliberate before it ever becomes a PDF.",
+    heroTitle: "Build a resume that feels crafted, not assembled from tools.",
     heroDescription:
       "Markdown Resume AI gives you a focused editor for turning rough career notes into clean, ATS-friendly resumes. Draft with AI, compare templates live, and export with confidence.",
     primaryCta: "Start Building",
@@ -45,7 +55,7 @@ const copy = {
     ],
     editorViewLabel: "Editor View",
     editorViewValue: "Real workspace capture",
-    convertsLabel: "What converts",
+    convertsLabel: "Why it lands",
     convertsDescription:
       "Users can see the editor, the paper preview, and the export path before they click in.",
     editorImageAlt:
@@ -126,7 +136,7 @@ const copy = {
     languageLabel: "语言",
     githubLabel: "GitHub",
     heroBadge: "AI 起草、模板切换与 PDF 导出，全部集中在一个工作区内",
-    heroTitle: "在导出 PDF 之前，先把简历打磨到足够专业。",
+    heroTitle: "把简历做成有设计感的成品，而不是工具拼起来的文件。",
     heroDescription:
       "Markdown Resume AI 提供一个聚焦的简历工作区，帮助你把零散经历整理成清晰、利于 ATS 识别的简历。你可以用 AI 起草、实时对比模板，并稳定导出 PDF。",
     primaryCta: "开始制作",
@@ -210,6 +220,23 @@ const copy = {
 } as const;
 
 const pillarIcons = [WandSparkles, LayoutTemplate, FileDown] as const;
+const trustCardAccents = [
+  "border-dashed bg-[#ffffff] text-[#333333]",
+  "bg-[#84e7a5] text-[#02492a]",
+  "bg-[#f8cc65] text-[#333333]",
+  "bg-[#c1b0ff] text-[#32037d]",
+];
+const pillarCardStyles = [
+  "bg-white",
+  "bg-[#84e7a5] text-[#02492a]",
+  "bg-[#3bd3fd] text-[#01418d]",
+];
+const workflowCardStyles = [
+  "bg-white",
+  "bg-[#f8cc65] text-[#333333]",
+  "bg-[#c1b0ff] text-[#32037d]",
+  "bg-[#84e7a5] text-[#02492a]",
+];
 
 export default function HomePageClient({ latestPosts }: HomePageClientProps) {
   const [language, setLanguage] = useState<Language>("en");
@@ -242,7 +269,12 @@ export default function HomePageClient({ latestPosts }: HomePageClientProps) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.15),_transparent_28%),radial-gradient(circle_at_85%_15%,_rgba(245,158,11,0.16),_transparent_20%),linear-gradient(180deg,_#f7f8f2_0%,_#eef2f7_38%,_#ffffff_100%)] text-slate-900">
+    <div
+      className={cn(
+        siteSans.className,
+        "min-h-screen bg-[#faf9f7] text-black"
+      )}
+    >
       <PageHeader
         brandName={t.brandName}
         githubLabel={t.githubLabel}
@@ -252,200 +284,270 @@ export default function HomePageClient({ latestPosts }: HomePageClientProps) {
         onLanguageChange={(nextLanguage) => setLanguage(nextLanguage as Language)}
       />
 
-      <main>
-        <section className="container mx-auto px-6 pb-12 pt-6 md:px-10 md:pb-16 md:pt-8 xl:px-16">
-          <div className="grid items-center gap-10 xl:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/85 px-4 py-2 text-sm font-medium text-sky-900 shadow-sm backdrop-blur">
-                <Sparkles className="h-4 w-4 text-sky-600" />
-                {t.heroBadge}
-              </div>
-
-              <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-slate-950 md:text-6xl">
-                {t.heroTitle}
-              </h1>
-
-              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 md:text-xl">
-                {t.heroDescription}
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/editor?template=mashhad"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
-                  {t.primaryCta}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="#templates"
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white/85 px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-white"
-                >
-                  {t.secondaryCta}
-                </Link>
-              </div>
-
-              <div className="mt-10 grid gap-3 sm:grid-cols-2">
-                {t.trustPoints.map((point) => (
+      <main className="pb-6">
+        <section className="container mx-auto px-6 pb-6 pt-8 md:px-10 xl:px-16">
+          <div
+            className={cn(
+              clayShadow,
+              "overflow-hidden rounded-[40px] border border-[#dad4c8] bg-[#f8cc65]"
+            )}
+          >
+            <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:p-8 xl:p-10">
+              <div className="flex flex-col justify-between">
+                <div>
                   <div
-                    key={point}
-                    className="flex items-start gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-slate-700 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur"
+                    className={cn(
+                      clayShadow,
+                      "inline-flex max-w-max items-center gap-2 rounded-full border border-[#dad4c8] bg-white px-4 py-2 text-[#333333]"
+                    )}
                   >
-                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                      <Check className="h-3.5 w-3.5" />
-                    </span>
-                    <span>{point}</span>
+                    <Sparkles className="h-4 w-4" />
+                    <span className="text-sm">{t.heroBadge}</span>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="relative">
-              <div className="absolute -left-6 top-8 hidden rounded-3xl border border-slate-200 bg-white/90 px-4 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.1)] backdrop-blur lg:block">
-                <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-400">
-                  {t.editorViewLabel}
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{t.editorViewValue}</p>
+                  <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-[0.94] tracking-[-0.08em] md:text-6xl xl:text-[5rem]">
+                    {t.heroTitle}
+                  </h1>
+
+                  <p className="mt-5 max-w-2xl text-lg leading-8 text-[#333333] md:text-xl">
+                    {t.heroDescription}
+                  </p>
+
+                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <Link
+                      href="/editor?template=mashhad"
+                      className={cn(clayButton, "bg-white text-black hover:bg-[#fc7981]")}
+                    >
+                      {t.primaryCta}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      href="#templates"
+                      className={cn(
+                        clayButton,
+                        "bg-transparent text-black hover:bg-[#c1b0ff]"
+                      )}
+                    >
+                      {t.secondaryCta}
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {t.trustPoints.map((point, index) => (
+                    <div
+                      key={point}
+                      className={cn(
+                        clayShadow,
+                        "rounded-[24px] border border-[#dad4c8] px-4 py-4",
+                        trustCardAccents[index % trustCardAccents.length]
+                      )}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full border border-black bg-white">
+                          <Check className="h-4 w-4" />
+                        </span>
+                        <p className="text-sm leading-6">{point}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="absolute -bottom-4 right-0 z-10 hidden max-w-[220px] rounded-[28px] border border-amber-200 bg-[#fff8eb] p-5 shadow-[0_20px_50px_rgba(217,119,6,0.12)] lg:block">
-                <p className="text-xs font-medium uppercase tracking-[0.22em] text-amber-700/70">
-                  {t.convertsLabel}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">{t.convertsDescription}</p>
-              </div>
+              <div className="relative">
+                <div
+                  className={cn(
+                    clayShadow,
+                    "absolute left-4 top-4 z-10 hidden rounded-[24px] border border-[#dad4c8] bg-white px-4 py-3 lg:block"
+                  )}
+                >
+                  <p className={cn(monoLabel, "text-[#55534e]")}>{t.editorViewLabel}</p>
+                  <p className="mt-2 text-sm font-medium">{t.editorViewValue}</p>
+                </div>
 
-              <div className="overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/70 p-3 shadow-[0_30px_90px_rgba(15,23,42,0.14)] backdrop-blur md:p-4">
-                <Image
-                  src="/screenshots/editor-workspace.png"
-                  alt={t.editorImageAlt}
-                  width={1600}
-                  height={1200}
-                  priority
-                  className="h-auto w-full rounded-[24px] border border-slate-200 object-cover"
-                />
+                <div
+                  className={cn(
+                    clayShadow,
+                    "absolute bottom-4 right-4 z-10 hidden max-w-[240px] rounded-[24px] border border-[#dad4c8] bg-[#84e7a5] px-4 py-4 lg:block"
+                  )}
+                >
+                  <p className={cn(monoLabel, "text-[#02492a]")}>{t.convertsLabel}</p>
+                  <p className="mt-2 text-sm leading-6 text-[#02492a]">{t.convertsDescription}</p>
+                </div>
+
+                <div
+                  className={cn(
+                    clayShadow,
+                    "rounded-[32px] border border-[#dad4c8] bg-white p-3 md:p-4"
+                  )}
+                >
+                  <Image
+                    src="/screenshots/editor-workspace.png"
+                    alt={t.editorImageAlt}
+                    width={1600}
+                    height={1200}
+                    priority
+                    className="h-auto w-full rounded-[24px] border border-[#dad4c8] object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-6 py-4 md:px-10 xl:px-16">
+        <section className="container mx-auto px-6 py-6 md:px-10 xl:px-16">
           <div className="grid gap-4 lg:grid-cols-3">
             {t.pillars.map((pillar, index) => {
               const Icon = pillarIcons[index];
+
               return (
                 <article
                   key={pillar.title}
-                  className="rounded-[28px] border border-slate-200 bg-white/85 p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]"
+                  className={cn(
+                    clayShadow,
+                    "rounded-[28px] border border-[#dad4c8] p-7",
+                    pillarCardStyles[index % pillarCardStyles.length]
+                  )}
                 >
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-[18px] border border-black bg-white">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h2 className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-slate-950">
+                  <h2 className="mt-5 text-[2rem] font-semibold leading-tight tracking-[-0.04em]">
                     {pillar.title}
                   </h2>
-                  <p className="mt-3 text-base leading-7 text-slate-600">{pillar.description}</p>
+                  <p className="mt-3 text-base leading-7 opacity-90">{pillar.description}</p>
                 </article>
               );
             })}
           </div>
         </section>
 
-        <section className="container mx-auto px-6 py-16 md:px-10 xl:px-16">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-start">
-            <div className="max-w-lg">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-700">
-                {t.journeyEyebrow}
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.03em] text-slate-950">
+        <section className="container mx-auto px-6 py-6 md:px-10 xl:px-16">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+            <div
+              className={cn(
+                clayShadow,
+                "rounded-[40px] border border-[#dad4c8] bg-white p-7 md:p-8"
+              )}
+            >
+              <p className={cn(monoLabel, "text-[#55534e]")}>{t.journeyEyebrow}</p>
+              <h2 className="mt-4 max-w-lg text-4xl font-semibold leading-tight tracking-[-0.05em] md:text-5xl">
                 {t.journeyTitle}
               </h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600">{t.journeyDescription}</p>
-              <div className="mt-8 rounded-[28px] border border-slate-200 bg-slate-950 p-6 text-slate-50 shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+              <p className="mt-4 max-w-xl text-lg leading-8 text-[#333333]">
+                {t.journeyDescription}
+              </p>
+
+              <div
+                className={cn(
+                  clayShadow,
+                  "mt-8 rounded-[32px] border border-[#dad4c8] bg-[#32037d] p-6 text-white"
+                )}
+              >
                 <div className="flex items-center gap-3">
-                  <Bot className="h-5 w-5 text-sky-300" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-200">
-                    {t.assistantLabel}
-                  </p>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10">
+                    <Bot className="h-5 w-5" />
+                  </span>
+                  <p className={cn(monoLabel, "text-[#c1b0ff]")}>{t.assistantLabel}</p>
                 </div>
-                <p className="mt-4 text-xl font-semibold">{t.assistantTitle}</p>
-                <p className="mt-3 text-sm leading-7 text-slate-300">{t.assistantDescription}</p>
+                <p className="mt-5 text-2xl font-semibold leading-tight tracking-[-0.03em]">
+                  {t.assistantTitle}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/80">{t.assistantDescription}</p>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {t.workflowSteps.map((item) => (
+              {t.workflowSteps.map((item, index) => (
                 <article
                   key={item.step}
-                  className="rounded-[28px] border border-slate-200 bg-white/85 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]"
+                  className={cn(
+                    clayShadow,
+                    "rounded-[28px] border border-[#dad4c8] p-6",
+                    workflowCardStyles[index % workflowCardStyles.length]
+                  )}
                 >
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    {item.step}
-                  </p>
-                  <h3 className="mt-4 text-xl font-semibold text-slate-950">{item.title}</h3>
-                  <p className="mt-3 text-base leading-7 text-slate-600">{item.description}</p>
+                  <p className={cn(monoLabel, "opacity-70")}>{item.step}</p>
+                  <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.03em]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-base leading-7 opacity-90">{item.description}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="border-y border-slate-200/80 bg-white/70">
-          <div className="container mx-auto px-6 py-16 md:px-10 xl:px-16" id="templates">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-700">
-                  {t.templatesEyebrow}
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.03em] text-slate-950">
-                  {t.templatesTitle}
-                </h2>
-                <p className="mt-4 text-lg leading-8 text-slate-600">{t.templatesDescription}</p>
+        <section className="container mx-auto px-6 py-6 md:px-10 xl:px-16" id="templates">
+          <div
+            className={cn(
+              clayShadow,
+              "overflow-hidden rounded-[40px] border border-[#dad4c8] bg-[#3bd3fd]"
+            )}
+          >
+            <div className="p-7 md:p-8 lg:p-10">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div className="max-w-2xl">
+                  <p className={cn(monoLabel, "text-[#01418d]")}>{t.templatesEyebrow}</p>
+                  <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.05em] md:text-5xl">
+                    {t.templatesTitle}
+                  </h2>
+                  <p className="mt-4 text-lg leading-8 text-[#01418d]">{t.templatesDescription}</p>
+                </div>
+
+                <Link
+                  href="/editor?template=tehran"
+                  className={cn(clayButton, "bg-white text-black hover:bg-[#84e7a5]")}
+                >
+                  {t.openEditor}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
 
-              <Link
-                href="/editor?template=tehran"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-sky-700"
-              >
-                {t.openEditor}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {primaryTemplates.map((template) => (
-                <TemplateCard
-                  key={template}
-                  template={template}
-                  description={t.templateCardDescription}
-                />
-              ))}
+              <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                {primaryTemplates.map((template, index) => (
+                  <TemplateCard
+                    key={template}
+                    template={template}
+                    description={t.templateCardDescription}
+                    accent={index}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-6 py-16 md:px-10 xl:px-16">
-          <div className="rounded-[36px] border border-slate-200 bg-[linear-gradient(135deg,_#0f172a_0%,_#172554_55%,_#082f49_100%)] p-8 text-white shadow-[0_30px_90px_rgba(15,23,42,0.22)] md:p-12">
+        <section className="container mx-auto px-6 py-6 md:px-10 xl:px-16">
+          <div
+            className={cn(
+              clayShadow,
+              "rounded-[40px] border border-[#525a69] bg-[#01418d] p-8 text-white md:p-10"
+            )}
+          >
             <div className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-200">
-                  {t.finalEyebrow}
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.03em]">{t.finalTitle}</h2>
-                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-200">{t.finalDescription}</p>
+                <p className={cn(monoLabel, "text-[#3bd3fd]")}>{t.finalEyebrow}</p>
+                <h2 className="mt-4 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.05em] md:text-5xl">
+                  {t.finalTitle}
+                </h2>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-white/80">{t.finalDescription}</p>
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row lg:justify-end">
                 <Link
                   href="/editor?template=mashhad"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                  className={cn(clayButton, "bg-white text-black hover:bg-[#f8cc65]")}
                 >
                   {t.finalPrimaryCta}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="#blog-posts"
-                  className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                  className={cn(
+                    clayButton,
+                    "border-white bg-transparent text-white hover:bg-[#fc7981] hover:text-black"
+                  )}
                 >
                   {t.finalSecondaryCta}
                 </Link>
@@ -454,21 +556,29 @@ export default function HomePageClient({ latestPosts }: HomePageClientProps) {
           </div>
         </section>
 
-        <section className="bg-white/75">
-          <div className="container mx-auto px-6 py-16 md:px-10 xl:px-16" id="blog-posts">
+        <section className="container mx-auto px-6 py-6 md:px-10 xl:px-16" id="blog-posts">
+          <div
+            className={cn(
+              clayShadow,
+              "rounded-[40px] border border-[#dad4c8] bg-white p-7 md:p-8 lg:p-10"
+            )}
+          >
             <div className="mb-10 max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-700">
-                {t.resourcesEyebrow}
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.03em] text-slate-950">
+              <p className={cn(monoLabel, "text-[#55534e]")}>{t.resourcesEyebrow}</p>
+              <h2 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.05em] md:text-5xl">
                 {t.resourcesTitle}
               </h2>
-              <p className="mt-4 text-lg leading-8 text-slate-600">{t.resourcesDescription}</p>
+              <p className="mt-4 text-lg leading-8 text-[#333333]">{t.resourcesDescription}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {latestPosts.map((post) => (
-                <BlogCard key={post.slug} post={post} readArticleLabel={t.readArticle} />
+              {latestPosts.map((post, index) => (
+                <BlogCard
+                  key={post.slug}
+                  post={post}
+                  readArticleLabel={t.readArticle}
+                  accent={index}
+                />
               ))}
             </div>
           </div>
@@ -483,30 +593,41 @@ export default function HomePageClient({ latestPosts }: HomePageClientProps) {
 function TemplateCard({
   template,
   description,
+  accent,
 }: {
   template: string;
   description: string;
+  accent: number;
 }) {
+  const accents = ["hover:bg-[#fc7981]", "hover:bg-[#84e7a5]", "hover:bg-[#f8cc65]", "hover:bg-[#c1b0ff]"];
+
   return (
     <Link
       href={`/editor?template=${template}`}
-      className="group overflow-hidden rounded-[28px] border border-slate-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.1)]"
+      className={cn(
+        clayShadow,
+        "group overflow-hidden rounded-[28px] border border-[#dad4c8] bg-white p-3 transition-transform duration-200 hover:-translate-y-1 hover:-rotate-1 hover:shadow-[-7px_7px_0_#000000]",
+        accents[accent % accents.length]
+      )}
     >
       <Image
         src={`/screenshots/${template}-resume.png`}
         alt={`${template} resume template preview`}
         width={720}
         height={960}
-        className="h-auto w-full rounded-[20px] border border-slate-200"
+        className="h-auto w-full rounded-[20px] border border-[#dad4c8]"
       />
-      <div className="flex items-center justify-between px-2 pb-2 pt-4">
-        <div>
-          <p className="text-lg font-semibold text-slate-950">
-            {ThemeList[template as keyof typeof ThemeList]}
-          </p>
-          <p className="mt-1 text-sm text-slate-500">{description}</p>
+      <div className="px-2 pb-2 pt-4">
+        <p className={cn(monoLabel, "text-[#55534e]")}>Template preview</p>
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-lg font-semibold tracking-[-0.03em] text-black">
+              {ThemeList[template as keyof typeof ThemeList]}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-[#55534e]">{description}</p>
+          </div>
+          <ArrowRight className="mt-1 h-5 w-5 flex-none text-black" />
         </div>
-        <ArrowRight className="h-5 w-5 text-slate-400 transition group-hover:text-sky-700" />
       </div>
     </Link>
   );
@@ -515,15 +636,23 @@ function TemplateCard({
 function BlogCard({
   post,
   readArticleLabel,
+  accent,
 }: {
   post: BlogPost;
   readArticleLabel: string;
+  accent: number;
 }) {
+  const accentBars = ["bg-[#fc7981]", "bg-[#84e7a5]", "bg-[#3bd3fd]", "bg-[#c1b0ff]"];
+
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.1)]"
+      className={cn(
+        clayShadow,
+        "group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#dad4c8] bg-[#faf9f7] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-1 hover:shadow-[-7px_7px_0_#000000]"
+      )}
     >
+      <div className={cn("h-2 w-full", accentBars[accent % accentBars.length])} />
       {post.metadata.image ? (
         <Image
           src={post.metadata.image}
@@ -534,13 +663,14 @@ function BlogCard({
         />
       ) : null}
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="text-xl font-semibold text-slate-950 transition group-hover:text-sky-700">
+        <p className={cn(monoLabel, "text-[#55534e]")}>Resume guide</p>
+        <h3 className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.03em] text-black">
           {post.metadata.title}
         </h3>
-        <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600">
+        <p className="mt-3 line-clamp-3 text-sm leading-7 text-[#55534e]">
           {post.metadata.summary}
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+        <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-black">
           {readArticleLabel}
           <ArrowRight className="h-4 w-4" />
         </div>

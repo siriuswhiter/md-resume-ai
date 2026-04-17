@@ -4,7 +4,7 @@ import PageFooter from "@/components/PageFooter";
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className='bg-gray-50'>
+        <div className='bg-[#faf9f7]'>
             <PageHeader/>
             <section>{children}</section>
             <PageFooter/>

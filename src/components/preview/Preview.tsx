@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { A4_PAPER_HEIGHT_PX, A4_PAPER_WIDTH_PX, getFontFamilyStack } from "@/lib/constants";
 import { buildManagedPreviewCss } from "@/lib/previewStyleGuards";
 import { restrictedResumeHtmlSchema } from "@/lib/restrictedHtml";
+import { siteMono, siteSans } from "@/lib/siteFonts";
 
 const A4_PAPER_WIDTH = A4_PAPER_WIDTH_PX;
 const A4_PAPER_HEIGHT = A4_PAPER_HEIGHT_PX;
@@ -282,7 +283,8 @@ export default function Preview({
             data-testid={testId}
             ref={previewShellRef}
             className={cn(
-                "relative flex h-full min-h-0 flex-col overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] overscroll-contain sm:p-3",
+                siteSans.className,
+                "relative flex h-full min-h-0 flex-col overflow-auto rounded-[28px] border border-[#dad4c8] bg-[#eee9df] p-2 shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)] overscroll-contain sm:p-3",
                 className
             )}
         >
@@ -348,7 +350,7 @@ export default function Preview({
                                     }}
                                 >
                                     {!isFirstPage ? (
-                                        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-dashed border-slate-200/90 px-6 py-3 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">
+                                        <div className={cn(siteMono.className, "pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-dashed border-[#dad4c8] px-6 py-3 text-[11px] uppercase tracking-[0.22em] text-[#9f9b93]")}>
                                             <span data-testid="preview-page-break">A4</span>
                                             <span>Page {index + 1}</span>
                                         </div>

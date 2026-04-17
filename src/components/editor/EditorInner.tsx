@@ -12,6 +12,7 @@ import {
     MDXEditorMethods
 } from '@mdxeditor/editor';
 import { cn } from '@/lib/utils';
+import { siteSans } from '@/lib/siteFonts';
 
 interface EditorInnerProps {
     markdown?: string;
@@ -38,7 +39,7 @@ export default function EditorInner({markdown, onChangeAction, className}: Edito
     };
 
     return (
-        <div className={cn("editor relative h-full overflow-auto rounded-[28px] border border-slate-200 bg-white custom-scrollbar overscroll-contain", className)}>
+        <div className={cn(siteSans.className, "editor relative h-full overflow-auto rounded-[28px] border border-[#dad4c8] bg-[#faf9f7] custom-scrollbar overscroll-contain shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]", className)}>
             <MDXEditor
                 ref={editorRef}
                 markdown={markdown ?? ''}

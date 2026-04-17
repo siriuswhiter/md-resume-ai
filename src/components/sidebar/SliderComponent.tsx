@@ -16,8 +16,8 @@ export const SliderComponent = ({label, value, min, max, step, onChange, current
     };
 
     return (
-        <div className='mb-2'>
-            <label className="flex justify-between text-sm font-medium text-[#5f6368]">
+        <div className='mb-3'>
+            <label className="mb-2 flex justify-between text-sm font-medium text-[#55534e]">
                 {label}
                 <span>{currentValue}</span>
             </label>

@@ -2,11 +2,56 @@
     display: none;
 }
 
+.editor {
+    color: #333333;
+}
+
 .editor .mdxeditor {
     display: flex;
     height: 100%;
     min-height: 100%;
     flex-direction: column;
+}
+
+.editor .mdxeditor,
+.editor .mdxeditor-root-contenteditable,
+.editor .mdxeditor-source-editor,
+.editor .cm-editor,
+.editor .cm-scroller,
+.editor .cm-gutters {
+    background: #faf9f7;
+}
+
+.editor .mdxeditor-root-contenteditable,
+.editor .cm-content,
+.editor .cm-line {
+    font-family: var(--font-site-sans, "Space Grotesk"), sans-serif;
+    color: #333333;
+}
+
+.editor .mdxeditor-root-contenteditable {
+    padding: 1rem 1.1rem 1.4rem;
+}
+
+.editor .mdxeditor-root-contenteditable h1,
+.editor .mdxeditor-root-contenteditable h2,
+.editor .mdxeditor-root-contenteditable h3,
+.editor .cm-line {
+    letter-spacing: -0.03em;
+}
+
+.editor .cm-editor {
+    font-size: 0.95rem;
+}
+
+.editor .cm-gutters {
+    border-right: 1px dashed #dad4c8;
+    color: #9f9b93;
+}
+
+.editor .cm-activeLine,
+.editor .cm-activeLineGutter {
+    background: rgba(248, 204, 101, 0.16);
 }
 
 .editor .mdxeditor-diff-source-wrapper,
@@ -33,4 +78,9 @@
 
 .editor .cm-scroller {
     overflow: auto;
+}
+
+.editor .cm-selectionBackground,
+.editor ::selection {
+    background: rgba(193, 176, 255, 0.4);
 }

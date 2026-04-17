@@ -20,6 +20,8 @@ import type {
   SavedStyleTemplate,
 } from "@/lib/styleAssistantTypes";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { siteMono, siteSans } from "@/lib/siteFonts";
 
 const RESUME_PLACEHOLDER =
   "粘贴杂乱经历，例如：联系方式、教育背景、工作经历、项目要点、技能清单、求职方向。";
@@ -79,6 +81,12 @@ export function SidebarAiSection({
   onApplyStyleTemplate,
   onDeleteStyleTemplate,
 }: Props) {
+  const clayShadow =
+    "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
+  const monoLabel = cn(
+    siteMono.className,
+    "text-[11px] font-normal uppercase tracking-[0.24em]"
+  );
   const [expandedOpen, setExpandedOpen] = useState(false);
   const [resumeLoading, setResumeLoading] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -212,19 +220,20 @@ export function SidebarAiSection({
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+      <div className={cn(siteSans.className, "space-y-4")}>
+        <div className={cn(clayShadow, "rounded-[24px] border border-[#dad4c8] bg-[#faf9f7] p-4")}>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700">
+              <div className={cn(clayShadow, "inline-flex items-center gap-2 rounded-full border border-[#dad4c8] bg-[#c1b0ff] px-3 py-1 text-xs font-medium text-[#32037d]")}>
                 <Sparkles className="h-3.5 w-3.5" />
                 AI 助手
               </div>
-              <p className="mt-3 text-sm font-semibold text-slate-900">简历草稿</p>
+              <p className={cn(monoLabel, "mt-3 text-[#55534e]")}>Draft maker</p>
+              <p className="mt-1 text-sm font-semibold text-black">简历草稿</p>
             </div>
             <button
               type="button"
-              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              className={cn(clayShadow, "inline-flex shrink-0 items-center gap-1 rounded-full border border-black bg-white px-3 py-1.5 text-xs font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-6px_6px_0_#000000]")}
               onClick={() => setExpandedOpen(true)}
               title="在大窗口中编辑原始材料"
             >
@@ -234,7 +243,7 @@ export function SidebarAiSection({
           </div>
 
           <textarea
-            className="min-h-[220px] w-full resize-y rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+            className="min-h-[220px] w-full resize-y rounded-[20px] border border-[#dad4c8] bg-white px-4 py-3 text-sm leading-6 text-black outline-none transition placeholder:text-[#9f9b93] focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
             value={rawInput}
             onChange={(e) => {
               onRawInputChange(e.target.value);
@@ -250,7 +259,7 @@ export function SidebarAiSection({
             <Button
               type="button"
               disabled={resumeLoading}
-              className="h-11 rounded-full bg-slate-900 text-white hover:bg-slate-800"
+              className="h-11 rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
               onClick={handleGenerateResume}
             >
               {resumeLoading ? (
@@ -268,36 +277,37 @@ export function SidebarAiSection({
           </div>
 
           {resumeLoading ? (
-            <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+            <div className={cn(clayShadow, "mt-3 rounded-2xl border border-[#dad4c8] bg-[#3bd3fd] px-4 py-3 text-sm text-[#01418d]")}>
               正在向模型发送请求并整理简历结构，请稍候。
             </div>
           ) : null}
           {resumeSuccess ? (
-            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#84e7a5] px-4 py-3 text-sm text-[#02492a]")}>
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{resumeSuccess}</span>
             </div>
           ) : null}
           {resumeError ? (
-            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#fc7981] px-4 py-3 text-sm text-[#5d1720]")}>
               <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{resumeError}</span>
             </div>
           ) : null}
         </div>
 
-        <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+        <div className={cn(clayShadow, "rounded-[24px] border border-[#dad4c8] bg-white p-4")}>
           <div className="mb-3 flex items-start gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black bg-[#f8cc65] text-black">
               <Paintbrush2 className="h-4.5 w-4.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900">样式助手</p>
+              <p className={cn(monoLabel, "text-[#55534e]")}>Style prompt</p>
+              <p className="mt-1 text-sm font-semibold text-black">样式助手</p>
             </div>
           </div>
 
           <textarea
-            className="min-h-[120px] w-full resize-y rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+            className="min-h-[120px] w-full resize-y rounded-[20px] border border-[#dad4c8] bg-[#faf9f7] px-4 py-3 text-sm leading-6 text-black outline-none transition placeholder:text-[#9f9b93] focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
             value={stylePrompt}
             onChange={(e) => {
               onStylePromptChange(e.target.value);
@@ -313,7 +323,7 @@ export function SidebarAiSection({
             <Button
               type="button"
               disabled={styleLoading}
-              className="h-11 rounded-full bg-slate-900 text-white hover:bg-slate-800"
+              className="h-11 rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#3bd3fd] hover:shadow-[-7px_7px_0_#000000]"
               onClick={handleGenerateStyle}
             >
               {styleLoading ? (
@@ -330,8 +340,8 @@ export function SidebarAiSection({
             </Button>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+          <div className={cn(clayShadow, "mt-4 rounded-2xl border border-[#dad4c8] bg-[#faf9f7] p-4")}>
+            <p className={cn(monoLabel, "text-[#55534e]")}>
               保存当前样式
             </p>
             <input
@@ -339,13 +349,13 @@ export function SidebarAiSection({
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
               placeholder="模板名称，例如：技术风格细横线"
-              className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+              className="mt-3 w-full rounded-2xl border border-[#dad4c8] bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
             />
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-7px_7px_0_#000000]"
                 onClick={handleSaveTemplate}
               >
                 保存为本地模板
@@ -354,30 +364,30 @@ export function SidebarAiSection({
           </div>
 
           {savedStyleTemplates.length > 0 ? (
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
+            <div className={cn(clayShadow, "mt-4 rounded-2xl border border-[#dad4c8] bg-[#faf9f7] p-4")}>
+              <p className={cn(monoLabel, "text-[#55534e]")}>
                 本地模板
               </p>
               <div className="mt-3 space-y-2">
                 {savedStyleTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-3"
+                    className={cn(clayShadow, "rounded-2xl border border-[#dad4c8] bg-white px-3 py-3")}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-900">
+                        <p className="truncate text-sm font-medium text-black">
                           {template.name}
                         </p>
                         {template.summary ? (
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="mt-1 text-xs leading-5 text-[#55534e]">
                             {template.summary}
                           </p>
                         ) : null}
                       </div>
                       <button
                         type="button"
-                        className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                        className="rounded-full border border-[#dad4c8] bg-white p-2 text-[#55534e] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:text-black hover:shadow-[-5px_5px_0_#000000]"
                         onClick={() => onDeleteStyleTemplate(template.id)}
                         aria-label={`删除模板 ${template.name}`}
                       >
@@ -388,7 +398,7 @@ export function SidebarAiSection({
                       <Button
                         type="button"
                         variant="outline"
-                        className="rounded-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
                         onClick={() => {
                           onApplyStyleTemplate(template.css);
                           setTemplateName(template.name);
@@ -411,18 +421,18 @@ export function SidebarAiSection({
           ) : null}
 
           {styleLoading ? (
-            <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+            <div className={cn(clayShadow, "mt-3 rounded-2xl border border-[#dad4c8] bg-[#3bd3fd] px-4 py-3 text-sm text-[#01418d]")}>
               正在根据你的描述生成 CSS，并同步到预览与导出样式。
             </div>
           ) : null}
           {styleSuccess ? (
-            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#84e7a5] px-4 py-3 text-sm text-[#02492a]")}>
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{styleSuccess}</span>
             </div>
           ) : null}
           {styleError ? (
-            <div className="mt-3 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#fc7981] px-4 py-3 text-sm text-[#5d1720]")}>
               <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{styleError}</span>
             </div>
@@ -432,7 +442,7 @@ export function SidebarAiSection({
 
       {expandedOpen ? (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/25 p-4 backdrop-blur-[2px]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="ai-expand-title"
@@ -441,24 +451,24 @@ export function SidebarAiSection({
           }}
         >
           <div
-            className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-[28px] bg-white p-5 shadow-2xl ring-1 ring-black/5"
+            className={cn(clayShadow, "flex max-h-[90vh] w-full max-w-3xl flex-col rounded-[32px] border border-[#dad4c8] bg-white p-5")}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-start justify-between gap-3 border-b border-[#eee9df] pb-3">
               <div>
                 <h3
                   id="ai-expand-title"
-                  className="text-base font-semibold text-slate-900"
+                  className="text-base font-semibold text-black"
                 >
                   编辑原始经历
                 </h3>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <p className="mt-1 text-xs leading-5 text-[#55534e]">
                   适合粘贴长文本。生成成功后会直接写入左侧 Markdown 编辑区。
                 </p>
               </div>
               <button
                 type="button"
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-full border border-[#dad4c8] bg-white p-2 text-[#55534e] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:text-black hover:shadow-[-5px_5px_0_#000000]"
                 onClick={() => setExpandedOpen(false)}
                 aria-label="关闭"
               >
@@ -467,28 +477,28 @@ export function SidebarAiSection({
             </div>
             <textarea
               ref={expandedTextareaRef}
-              className="mt-4 min-h-[min(55vh,520px)] w-full flex-1 resize-y rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+              className="mt-4 min-h-[min(55vh,520px)] w-full flex-1 resize-y rounded-[24px] border border-[#dad4c8] bg-[#faf9f7] p-4 text-sm leading-6 text-black outline-none transition focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
               value={rawInput}
               onChange={(e) => onRawInputChange(e.target.value)}
               placeholder={RESUME_PLACEHOLDER}
               spellCheck={false}
             />
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+            <div className="mt-2 flex items-center justify-between text-xs text-[#9f9b93]">
               <span>{rawInput.length} 字</span>
               <span className="hidden sm:inline">Esc 关闭 · 点击背景可关闭</span>
             </div>
-            <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-[#eee9df] pt-4">
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-full"
+                className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-7px_7px_0_#000000]"
                 onClick={() => setExpandedOpen(false)}
               >
                 取消
               </Button>
               <Button
                 type="button"
-                className="rounded-full bg-slate-900 text-white hover:bg-slate-800"
+                className="rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
                 disabled={resumeLoading}
                 onClick={handleGenerateResume}
               >

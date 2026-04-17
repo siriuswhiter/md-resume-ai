@@ -23,6 +23,8 @@ import ColorPicker from "@/components/sidebar/ColorPicker";
 import type { LlmSettings } from "@/lib/llmTypes";
 import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { siteMono, siteSans } from "@/lib/siteFonts";
 
 interface SidebarProps {
   variant: "inline" | "drawer";
@@ -67,6 +69,13 @@ interface SidebarProps {
   onApplyStyleTemplate: (css: string) => void;
   onDeleteStyleTemplate: (id: string) => void;
 }
+
+const clayShadow =
+  "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
+const monoLabel = cn(
+  siteMono.className,
+  "text-[11px] font-normal uppercase tracking-[0.24em]"
+);
 
 export default function Sidebar({
   variant,
@@ -122,21 +131,27 @@ export default function Sidebar({
     )?.id ?? null;
 
   const panel = (
-    <div className="sidebar flex h-full flex-col rounded-[30px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+    <div
+      className={cn(
+        siteSans.className,
+        clayShadow,
+        "sidebar flex h-full flex-col rounded-[34px] border border-[#dad4c8] bg-white"
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-[#eee9df] px-4 py-4">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-[18px] border border-black bg-[#f8cc65] text-black">
             <PanelRight className="h-4.5 w-4.5" />
           </span>
           <div>
-            <h2 className="text-base font-semibold text-slate-900">工具面板</h2>
-            <p className="mt-1 text-xs text-slate-500">主题、排版、AI</p>
+            <p className={cn(monoLabel, "text-[#55534e]")}>Control deck</p>
+            <h2 className="mt-1 text-base font-semibold text-black">工具面板</h2>
           </div>
         </div>
         {variant === "drawer" && onClose ? (
           <button
             type="button"
-            className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-full border border-[#dad4c8] bg-white p-2 text-[#55534e] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:text-black hover:shadow-[-6px_6px_0_#000000]"
             onClick={onClose}
             aria-label="关闭工具抽屉"
           >
@@ -145,14 +160,16 @@ export default function Sidebar({
         ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-b border-slate-100 px-4 py-3">
+      <div className="grid grid-cols-2 gap-2 border-b border-[#eee9df] px-4 py-3">
         <button
           type="button"
-          className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition ${
+          className={cn(
+            clayShadow,
+            "inline-flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-transform duration-200",
             activeTab === "style"
-              ? "bg-slate-900 text-white"
-              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-          }`}
+              ? "border-black bg-[#84e7a5] text-[#02492a]"
+              : "border-[#dad4c8] bg-white text-[#55534e] hover:-rotate-2 hover:-translate-y-0.5 hover:bg-[#f8cc65] hover:text-black"
+          )}
           onClick={() => setActiveTab("style")}
         >
           <Palette className="h-4 w-4" />
@@ -160,11 +177,13 @@ export default function Sidebar({
         </button>
         <button
           type="button"
-          className={`inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition ${
+          className={cn(
+            clayShadow,
+            "inline-flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-transform duration-200",
             activeTab === "ai"
-              ? "bg-slate-900 text-white"
-              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-          }`}
+              ? "border-black bg-[#c1b0ff] text-[#32037d]"
+              : "border-[#dad4c8] bg-white text-[#55534e] hover:-rotate-2 hover:-translate-y-0.5 hover:bg-[#3bd3fd] hover:text-black"
+          )}
           onClick={() => setActiveTab("ai")}
         >
           <Sparkles className="h-4 w-4" />
@@ -175,36 +194,37 @@ export default function Sidebar({
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {activeTab === "style" ? (
           <div className="space-y-4">
-            <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            <div className={cn(clayShadow, "rounded-[26px] border border-[#dad4c8] bg-[#faf9f7] p-4")}>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4 text-sky-600" />
-                  <p className="text-sm font-semibold text-slate-900">主题</p>
+                  <Palette className="h-4 w-4 text-[#01418d]" />
+                  <p className="text-sm font-semibold text-black">主题</p>
                 </div>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                <span className={cn(monoLabel, "rounded-full border border-[#dad4c8] bg-white px-2.5 py-1 text-[#55534e]")}>
                   当前：{selectedThemeMeta.label}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {Object.values(themePresetMeta).map((preset) => {
+                {Object.values(themePresetMeta).map((preset, index) => {
                   const active = preset.id === normalizedTheme;
+                  const accents = ["bg-white", "bg-[#84e7a5]", "bg-[#f8cc65]", "bg-[#c1b0ff]"];
                   return (
                     <button
                       type="button"
                       key={preset.id}
                       onClick={() => onThemeChange(preset.id)}
-                      className={`rounded-[18px] border px-3 py-3 text-left transition ${
+                      className={cn(
+                        clayShadow,
+                        "rounded-[20px] border px-3 py-3 text-left transition-transform duration-200 hover:-translate-y-1 hover:-rotate-1 hover:shadow-[-6px_6px_0_#000000]",
                         active
-                          ? "border-sky-300 bg-sky-50 shadow-sm"
-                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                      }`}
+                          ? "border-black bg-[#3bd3fd]"
+                          : `border-[#dad4c8] ${accents[index % accents.length]}`
+                      )}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-semibold text-slate-900">
-                          {preset.label}
-                        </p>
+                        <p className="text-sm font-semibold text-black">{preset.label}</p>
                         {active ? (
-                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-600 text-white">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-black bg-white text-black">
                             <Check className="h-3 w-3" />
                           </span>
                         ) : null}
@@ -215,21 +235,19 @@ export default function Sidebar({
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            <div className={cn(clayShadow, "rounded-[26px] border border-[#dad4c8] bg-white p-4")}>
               <div className="mb-3 flex items-center gap-2">
-                <Palette className="h-4 w-4 text-sky-600" />
-                <p className="text-sm font-semibold text-slate-900">高频设置</p>
+                <Palette className="h-4 w-4 text-[#01418d]" />
+                <p className="text-sm font-semibold text-black">高频设置</p>
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                  字体风格
-                </label>
+                <label className={cn(monoLabel, "mb-2 block text-[#55534e]")}>字体风格</label>
                 <div className="relative">
                   <select
                     value={font}
                     onChange={(e) => onFontChange(e.target.value)}
-                    className="w-full appearance-none rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition hover:border-slate-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                    className="w-full appearance-none rounded-full border border-[#dad4c8] bg-[#faf9f7] px-4 py-3 text-sm text-black outline-none transition hover:bg-white focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
                     aria-label="选择字体"
                     style={{ fontFamily: font }}
                   >
@@ -239,66 +257,59 @@ export default function Sidebar({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#55534e]" />
                 </div>
               </div>
 
               <div className="mt-4">
-                <label className="mb-2 block text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                  版式密度
-                </label>
+                <label className={cn(monoLabel, "mb-2 block text-[#55534e]")}>版式密度</label>
                 <div className="grid grid-cols-3 gap-2">
-                  {densityPresets.map((preset) => {
+                  {densityPresets.map((preset, index) => {
                     const active = matchedDensity === preset.id;
+                    const accents = ["bg-white", "bg-[#84e7a5]", "bg-[#f8cc65]"];
                     return (
                       <button
                         type="button"
                         key={preset.id}
                         onClick={() => onDensityPresetChange(preset.id)}
-                        className={`rounded-[18px] border px-3 py-3 text-left transition ${
+                        className={cn(
+                          clayShadow,
+                          "rounded-[18px] border px-3 py-3 text-left transition-transform duration-200 hover:-translate-y-1 hover:-rotate-1 hover:shadow-[-5px_5px_0_#000000]",
                           active
-                            ? "border-sky-300 bg-sky-50"
-                            : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white"
-                        }`}
+                            ? "border-black bg-[#c1b0ff] text-[#32037d]"
+                            : `border-[#dad4c8] ${accents[index % accents.length]} text-black`
+                        )}
                       >
-                        <p className="text-sm font-medium text-slate-900">
-                          {preset.label}
-                        </p>
+                        <p className="text-sm font-medium">{preset.label}</p>
                       </button>
                     );
                   })}
                 </div>
               </div>
-
             </div>
 
-            <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+            <div className={cn(clayShadow, "rounded-[26px] border border-[#dad4c8] bg-white p-4")}>
               <button
                 type="button"
                 className="flex w-full items-center justify-between gap-3 text-left"
                 onClick={() => setAdvancedOpen((current) => !current)}
               >
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4 text-sky-600" />
+                  <SlidersHorizontal className="h-4 w-4 text-[#01418d]" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      高级设置
-                    </p>
+                    <p className={cn(monoLabel, "text-[#55534e]")}>Deeper control</p>
+                    <p className="mt-1 text-sm font-semibold text-black">高级设置</p>
                   </div>
                 </div>
                 <ChevronDown
-                  className={`h-4 w-4 text-slate-400 transition ${
-                    advancedOpen ? "rotate-180" : ""
-                  }`}
+                  className={cn("h-4 w-4 text-[#55534e] transition", advancedOpen ? "rotate-180" : "")}
                 />
               </button>
 
               {advancedOpen ? (
-                <div className="mt-4 space-y-4 border-t border-slate-100 pt-4">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                      字体与层级
-                    </p>
+                <div className="mt-4 space-y-4 border-t border-dashed border-[#dad4c8] pt-4">
+                  <div className="rounded-[22px] border border-[#dad4c8] bg-[#faf9f7] p-4">
+                    <p className={cn(monoLabel, "mb-3 text-[#55534e]")}>字体与层级</p>
                     <SliderComponent
                       label="正文大小"
                       value={fontScale}
@@ -319,10 +330,8 @@ export default function Sidebar({
                     />
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                      版式微调
-                    </p>
+                  <div className="rounded-[22px] border border-[#dad4c8] bg-[#faf9f7] p-4">
+                    <p className={cn(monoLabel, "mb-3 text-[#55534e]")}>版式微调</p>
                     <SliderComponent
                       label="行距"
                       value={lineHeightScale}
@@ -352,10 +361,8 @@ export default function Sidebar({
                     />
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                      颜色
-                    </p>
+                  <div className="rounded-[22px] border border-[#dad4c8] bg-[#faf9f7] p-4">
+                    <p className={cn(monoLabel, "mb-3 text-[#55534e]")}>颜色</p>
                     <ColorPicker
                       label="标题颜色"
                       value={headerColor}
@@ -373,18 +380,16 @@ export default function Sidebar({
                     />
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.12em] text-slate-400">
-                      自定义 CSS
-                    </p>
+                  <div className="rounded-[22px] border border-[#dad4c8] bg-[#faf9f7] p-4">
+                    <p className={cn(monoLabel, "mb-3 text-[#55534e]")}>自定义 CSS</p>
                     <textarea
                       value={customCss}
                       onChange={(e) => onCustomCssChange(e.target.value)}
                       spellCheck={false}
                       placeholder={`.previewContainer h2 {\n  border-bottom: 1px solid var(--headerColor);\n  padding-bottom: 0.35rem;\n}`}
-                      className="min-h-[180px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs leading-6 text-slate-800 outline-none transition hover:border-slate-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+                      className="min-h-[180px] w-full rounded-[22px] border border-[#dad4c8] bg-white px-4 py-3 font-mono text-xs leading-6 text-black outline-none transition focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
                     />
-                    <p className="mt-3 text-xs leading-5 text-slate-500">
+                    <p className="mt-3 text-xs leading-5 text-[#55534e]">
                       直接写作用于 `.previewContainer` 的 CSS。预览与 PDF 导出会共用这份样式。
                     </p>
                   </div>
@@ -420,11 +425,11 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="border-t border-slate-100 px-4 py-3">
+      <div className="border-t border-[#eee9df] px-4 py-3">
         <Button
           type="button"
           variant="outline"
-          className="w-full rounded-full border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+          className="w-full rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:shadow-[-7px_7px_0_#000000]"
           onClick={onClose}
           disabled={variant !== "drawer"}
         >
@@ -441,7 +446,7 @@ export default function Sidebar({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-40 hidden bg-slate-950/35 backdrop-blur-[2px] lg:block min-[1400px]:hidden">
+    <div className="fixed inset-0 z-40 hidden bg-black/20 backdrop-blur-[2px] lg:block min-[1400px]:hidden">
       <button
         type="button"
         className="absolute inset-0"

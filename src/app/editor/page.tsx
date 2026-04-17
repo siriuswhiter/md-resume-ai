@@ -40,6 +40,8 @@ import {
 } from "@/lib/llmStorage";
 import type { LlmSettings } from "@/lib/llmTypes";
 import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
+import { cn } from "@/lib/utils";
+import { siteMono, siteSans } from "@/lib/siteFonts";
 
 type FeedbackTone = "info" | "success" | "error";
 
@@ -370,6 +372,14 @@ function EditorPageContent() {
     { label: "章节", value: sectionCount.toString() },
     { label: "要点", value: bulletCount.toString() },
   ];
+  const monoLabel = cn(
+    siteMono.className,
+    "text-[11px] font-normal uppercase tracking-[0.24em]"
+  );
+  const clayShadow =
+    "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
+  const clayButton =
+    "inline-flex items-center gap-2 rounded-full border border-black px-4 py-2 text-sm font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:shadow-[-7px_7px_0_#000000]";
 
   const feedbackStyles: Record<
     FeedbackTone,
@@ -377,56 +387,82 @@ function EditorPageContent() {
   > = {
     info: {
       icon: ScanSearch,
-      className: "border-sky-200 bg-sky-50 text-sky-800",
+      className: "border-[#dad4c8] bg-[#3bd3fd] text-[#01418d]",
     },
     success: {
       icon: CheckCircle2,
-      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      className: "border-[#dad4c8] bg-[#84e7a5] text-[#02492a]",
     },
     error: {
       icon: AlertCircle,
-      className: "border-red-200 bg-red-50 text-red-800",
+      className: "border-[#dad4c8] bg-[#fc7981] text-[#5d1720]",
     },
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(251,191,36,0.10),_transparent_28%),linear-gradient(180deg,_#f8fafc_0%,_#eef2f7_100%)] text-slate-900 lg:flex lg:h-screen lg:flex-col lg:overflow-hidden">
-      <header className="shrink-0 border-b border-white/60 bg-white/78 backdrop-blur-xl">
+    <div
+      className={cn(
+        siteSans.className,
+        "min-h-screen bg-[#faf9f7] text-black lg:flex lg:h-screen lg:flex-col lg:overflow-hidden"
+      )}
+    >
+      <header className="shrink-0 border-b border-[#dad4c8] bg-[#faf9f7]/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1720px] flex-wrap items-center gap-2 px-3 py-2 lg:px-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className={cn(clayShadow, clayButton, "bg-white hover:bg-[#f8cc65]")}
           >
-            <FilePenLine className="h-4 w-4 text-sky-600" />
+            <FilePenLine className="h-4 w-4" />
             Markdown Resume AI
           </Link>
 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="max-w-full truncate text-sm font-semibold text-slate-900">
+              <p className="max-w-full truncate text-sm font-semibold text-black">
                 {resumeTitle}
               </p>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+              <span
+                className={cn(
+                  clayShadow,
+                  monoLabel,
+                  "rounded-full border border-[#dad4c8] bg-[#84e7a5] px-2.5 py-1 text-[#02492a]"
+                )}
+              >
                 {documentStatus}
               </span>
-              <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
+              <span
+                className={cn(
+                  clayShadow,
+                  monoLabel,
+                  "rounded-full border border-[#dad4c8] bg-[#f8cc65] px-2.5 py-1 text-[#9d6a09]"
+                )}
+              >
                 {aiStatus}
               </span>
-              <span className="hidden rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-medium text-sky-700 min-[960px]:inline-flex">
+              <span
+                className={cn(
+                  clayShadow,
+                  monoLabel,
+                  "hidden rounded-full border border-[#dad4c8] bg-[#c1b0ff] px-2.5 py-1 text-[#32037d] min-[960px]:inline-flex"
+                )}
+              >
                 <span className="inline-flex items-center gap-1.5">
                   <Layers3 className="h-3.5 w-3.5" />
                   {themePresetMeta[activeThemeKey].label}
                 </span>
               </span>
             </div>
-            <div className="mt-1 hidden flex-wrap items-center gap-2 text-[11px] text-slate-500 xl:flex">
+            <div className={cn("mt-1 hidden flex-wrap items-center gap-2 xl:flex", monoLabel, "text-[#55534e]")}>
               <span className="truncate">{structureHint}</span>
               {compactStats.map((item) => (
                 <span
                   key={item.label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 font-medium text-slate-600"
+                  className={cn(
+                    clayShadow,
+                    "inline-flex items-center gap-1.5 rounded-full border border-[#dad4c8] bg-white px-2.5 py-1 text-[#55534e]"
+                  )}
                 >
-                  <span className="text-slate-900">{item.value}</span>
+                  <span className="text-black">{item.value}</span>
                   {item.label}
                 </span>
               ))}
@@ -436,7 +472,7 @@ function EditorPageContent() {
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              className={cn(clayShadow, clayButton, "bg-white hover:bg-[#3bd3fd]")}
               onClick={() => setSettingsOpen(true)}
             >
               {llmSettings.useServerRoute ? (
@@ -449,7 +485,11 @@ function EditorPageContent() {
 
             <button
               type="button"
-              className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 lg:inline-flex min-[1380px]:hidden"
+              className={cn(
+                clayShadow,
+                clayButton,
+                "hidden bg-white hover:bg-[#c1b0ff] lg:inline-flex min-[1380px]:hidden"
+              )}
               onClick={() => setDrawerOpen(true)}
             >
               <PanelRight className="h-4 w-4" />
@@ -458,7 +498,10 @@ function EditorPageContent() {
 
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className={cn(
+                clayShadow,
+                "inline-flex items-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-sm font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:shadow-[-7px_7px_0_#000000] disabled:cursor-not-allowed disabled:border-[#9f9b93] disabled:bg-[#eee9df] disabled:text-[#9f9b93] disabled:shadow-none"
+              )}
               onClick={handleExportPdf}
               disabled={isExporting}
             >
@@ -502,9 +545,9 @@ function EditorPageContent() {
         >
           {feedback ? (
             <div
-              className={`flex items-start gap-3 rounded-[20px] border px-4 py-2.5 text-sm shadow-sm ${
+              className={cn(`flex items-start gap-3 rounded-[24px] border px-4 py-3 text-sm ${clayShadow} ${
                 feedbackStyles[feedback.tone].className
-              }`}
+              }`)}
             >
               {(() => {
                 const Icon = feedbackStyles[feedback.tone].icon;
@@ -517,18 +560,19 @@ function EditorPageContent() {
           <div className="grid min-h-0 flex-1 gap-3 min-[1380px]:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
             <div className="min-w-0 min-h-0 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className={cn(clayShadow, "flex min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#dad4c8] bg-white p-3")}>
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className={cn(monoLabel, "text-[#55534e]")}>Workspace</p>
+                      <p className="mt-1 text-sm font-semibold text-black">
                         Markdown 编辑区
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
+                      <span className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-[#84e7a5] px-2.5 py-1 text-[#02492a]")}>
                         自动保存
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600">
+                      <span className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-white px-2.5 py-1 text-[#55534e]")}>
                         Markdown 输入
                       </span>
                     </div>
@@ -542,14 +586,15 @@ function EditorPageContent() {
                   </div>
                 </section>
 
-                <section className="flex min-h-0 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+                <section className={cn(clayShadow, "flex min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#dad4c8] bg-white p-3")}>
                   <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className={cn(monoLabel, "text-[#55534e]")}>Paper view</p>
+                      <p className="mt-1 text-sm font-semibold text-black">
                         实时预览
                       </p>
                     </div>
-                    <div className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                    <div className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-[#f8cc65] px-2.5 py-1 text-[#9d6a09]")}>
                       A4 分页预览
                     </div>
                   </div>
