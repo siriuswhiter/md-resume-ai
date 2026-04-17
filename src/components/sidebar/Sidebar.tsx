@@ -22,7 +22,6 @@ import { SliderComponent } from "@/components/sidebar/SliderComponent";
 import ColorPicker from "@/components/sidebar/ColorPicker";
 import type { LlmSettings } from "@/lib/llmTypes";
 import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { siteMono, siteSans } from "@/lib/siteFonts";
 
@@ -425,17 +424,6 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="border-t border-[#eee9df] px-4 py-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:shadow-[-7px_7px_0_#000000]"
-          onClick={onClose}
-          disabled={variant !== "drawer"}
-        >
-          收起工具抽屉
-        </Button>
-      </div>
     </div>
   );
 
