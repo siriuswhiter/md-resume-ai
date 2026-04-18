@@ -1,7 +1,7 @@
 'use client';
 
-import { CSSProperties, MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import ReactMarkdown from 'react-markdown';
+import { Children, CSSProperties, MutableRefObject, ReactNode, isValidElement, useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown, { Components } from 'react-markdown';
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from 'remark-gfm';
@@ -43,6 +43,78 @@ interface PreviewProps {
     testId?: string;
     paperTestId?: string;
 }
+
+interface ProjectMetaParts {
+    title: string;
+    role: string;
+    date: string;
+}
+
+const PROJECT_META_SEPARATOR = /\s*[·•]\s*/;
+
+const flattenNodeText = (node: ReactNode): string => {
+    if (typeof node === "string" || typeof node === "number") {
+        return String(node);
+    }
+
+    if (Array.isArray(node)) {
+        return node.map(flattenNodeText).join("");
+    }
+
+    if (isValidElement<{ children?: ReactNode }>(node)) {
+        return flattenNodeText(node.props.children);
+    }
+
+    return "";
+};
+
+const extractProjectMetaParts = (children: ReactNode): ProjectMetaParts | null => {
+    const text = Children.toArray(children)
+        .map(flattenNodeText)
+        .join("")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!text) {
+        return null;
+    }
+
+    const parts = text
+        .split(PROJECT_META_SEPARATOR)
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+    if (parts.length !== 3) {
+        return null;
+    }
+
+    const [title, role, date] = parts;
+    const looksLikeDate = /(?:\d{4}|\d{1,2}[./-]\d{1,2}|至今|present|current)/i.test(date);
+
+    if (!title || !role || !looksLikeDate) {
+        return null;
+    }
+
+    return { title, role, date };
+};
+
+const markdownComponents: Components = {
+    p({ children, className, ...props }) {
+        const metaParts = extractProjectMetaParts(children);
+
+        if (!metaParts) {
+            return <p className={className} {...props}>{children}</p>;
+        }
+
+        return (
+            <p className={cn(className, "resume-meta-row")} {...props}>
+                <span className="resume-meta-title">{metaParts.title}</span>
+                <span className="resume-meta-center">{metaParts.role}</span>
+                <span className="resume-meta-date">{metaParts.date}</span>
+            </p>
+        );
+    },
+};
 
 const getNodeMetrics = (node: HTMLElement, rootRect: DOMRect) => {
     const rect = node.getBoundingClientRect();
@@ -313,6 +385,7 @@ export default function Preview({
                           rehypeRaw,
                           [rehypeSanitize, restrictedResumeHtmlSchema],
                         ]}
+                        components={markdownComponents}
                       >
                         {content}
                       </ReactMarkdown>
