@@ -89,6 +89,31 @@ body {
 .previewContainer hr {
     margin: 1rem 0;
 }
+
+.previewContainer .resume-meta-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: baseline;
+}
+
+.previewContainer .resume-meta-title {
+    min-width: 0;
+    font-weight: 600;
+    text-align: left;
+}
+
+.previewContainer .resume-meta-center {
+    justify-self: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.previewContainer .resume-meta-date {
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+}
 `;
 
 const tehranTheme = `
