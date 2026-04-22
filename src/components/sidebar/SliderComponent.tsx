@@ -16,10 +16,10 @@ export const SliderComponent = ({label, value, min, max, step, onChange, current
     };
 
     return (
-        <div className='mb-3'>
-            <label className="mb-2 flex justify-between text-sm font-medium text-[#55534e]">
+        <div className='mb-2'>
+            <label className="mb-1.5 flex justify-between text-xs text-[--ui-text-muted]">
                 {label}
-                <span>{currentValue}</span>
+                <span className="text-[--ui-text]">{currentValue}</span>
             </label>
             <Slider
                 value={[value]}
@@ -27,7 +27,7 @@ export const SliderComponent = ({label, value, min, max, step, onChange, current
                 min={min}
                 step={step}
                 onValueChange={handleChange}
-                className='py-2'
+                className='py-1'
             />
         </div>
     );
