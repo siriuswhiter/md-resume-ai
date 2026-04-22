@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   CheckCircle2,
   Maximize2,
-  Paintbrush2,
-  Sparkles,
   TriangleAlert,
   WandSparkles,
   X,
@@ -19,14 +17,13 @@ import type {
   GeneratedStyleTemplate,
   SavedStyleTemplate,
 } from "@/lib/styleAssistantTypes";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { siteMono, siteSans } from "@/lib/siteFonts";
+import { siteSans } from "@/lib/siteFonts";
 
 const RESUME_PLACEHOLDER =
   "粘贴杂乱经历，例如：联系方式、教育背景、工作经历、项目要点、技能清单、求职方向。";
 const STYLE_PLACEHOLDER =
-  "例如：做一个技术风格的简历标题层级，H2 下方加细横线，列表更紧凑，链接不要下划线。";
+  "例如：H2 下方加细横线，列表更紧凑，链接不要下划线。";
 
 type Props = {
   rawInput: string;
@@ -81,12 +78,6 @@ export function SidebarAiSection({
   onApplyStyleTemplate,
   onDeleteStyleTemplate,
 }: Props) {
-  const clayShadow =
-    "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
-  const monoLabel = cn(
-    siteMono.className,
-    "text-[11px] font-normal uppercase tracking-[0.24em]"
-  );
   const [expandedOpen, setExpandedOpen] = useState(false);
   const [resumeLoading, setResumeLoading] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -120,33 +111,26 @@ export function SidebarAiSection({
     return () => window.removeEventListener("keydown", onKey);
   }, [expandedOpen]);
 
-  const requireConfiguredLlm = () => {
-    if (llmSettings.useServerRoute || llmSettings.apiKey.trim()) {
-      return true;
-    }
-    return false;
-  };
+  const requireConfiguredLlm = () =>
+    llmSettings.useServerRoute || !!llmSettings.apiKey.trim();
 
   const handleGenerateResume = async () => {
     setResumeError(null);
     setResumeSuccess(null);
-
     if (!requireConfiguredLlm()) {
-      setResumeError("请先在页面右上角完成 AI 配置。");
+      setResumeError("请先在右上角「设置」中完成 AI 配置。");
       return;
     }
-
     if (!rawInput.trim()) {
-      setResumeError("请先粘贴原始经历，再生成 Markdown 草稿。");
+      setResumeError("请先粘贴原始经历，再生成草稿。");
       return;
     }
-
     setResumeLoading(true);
     try {
       const markdown = await generateMarkdownResumeBody(llmSettings, rawInput);
       onMarkdownGenerated(markdown);
       setExpandedOpen(false);
-      setResumeSuccess("Markdown 草稿已写入编辑区，接下来可继续手动精修。");
+      setResumeSuccess("草稿已写入编辑区。");
     } catch (e) {
       setResumeError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -157,17 +141,14 @@ export function SidebarAiSection({
   const handleGenerateStyle = async () => {
     setStyleError(null);
     setStyleSuccess(null);
-
     if (!requireConfiguredLlm()) {
-      setStyleError("请先在页面右上角完成 AI 配置。");
+      setStyleError("请先在右上角「设置」中完成 AI 配置。");
       return;
     }
-
     if (!stylePrompt.trim()) {
-      setStyleError("请先描述你想要的样式效果，再生成 CSS。");
+      setStyleError("请先描述样式效果。");
       return;
     }
-
     setStyleLoading(true);
     try {
       const template = await generatePreviewCssTemplate(llmSettings, {
@@ -190,7 +171,7 @@ export function SidebarAiSection({
       setStyleSuccess(
         template.summary?.trim()
           ? `${template.name} 已应用。${template.summary}`
-          : `${template.name} 已应用到当前自定义 CSS。`
+          : `${template.name} 已应用。`
       );
     } catch (e) {
       setStyleError(e instanceof Error ? e.message : String(e));
@@ -202,312 +183,226 @@ export function SidebarAiSection({
   const handleSaveTemplate = () => {
     setStyleError(null);
     setStyleSuccess(null);
-
     if (!customCss.trim()) {
-      setStyleError("当前没有可保存的 CSS。请先生成或手动填写自定义样式。");
+      setStyleError("当前没有可保存的 CSS。");
       return;
     }
-
-    const finalName = templateName.trim() || generatedTemplate?.name || "未命名样式模板";
+    const finalName = templateName.trim() || generatedTemplate?.name || "未命名样式";
     onSaveStyleTemplate({
       name: finalName,
       css: customCss,
       summary: generatedTemplate?.summary?.trim() || undefined,
     });
     setTemplateName(finalName);
-    setStyleSuccess(`样式模板“${finalName}”已保存到本地浏览器。`);
+    setStyleSuccess(`"${finalName}"已保存。`);
   };
 
+  const btnBase =
+    "inline-flex items-center justify-center gap-1.5 rounded-[var(--ui-radius)] border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
+  const btnPrimary = `${btnBase} border-[--ui-text] bg-[--ui-text] text-white hover:opacity-80`;
+  const btnSecondary = `${btnBase} border-[--ui-border] bg-white text-[--ui-text] hover:border-[--ui-text]`;
+
   return (
-    <>
-      <div className={cn(siteSans.className, "space-y-4")}>
-        <div className={cn(clayShadow, "rounded-[24px] border border-[#dad4c8] bg-[#faf9f7] p-4")}>
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div>
-              <div className={cn(clayShadow, "inline-flex items-center gap-2 rounded-full border border-[#dad4c8] bg-[#c1b0ff] px-3 py-1 text-xs font-medium text-[#32037d]")}>
-                <Sparkles className="h-3.5 w-3.5" />
-                AI 助手
-              </div>
-              <p className={cn(monoLabel, "mt-3 text-[#55534e]")}>Draft maker</p>
-              <p className="mt-1 text-sm font-semibold text-black">简历草稿</p>
-            </div>
-            <button
-              type="button"
-              className={cn(clayShadow, "inline-flex shrink-0 items-center gap-1 rounded-full border border-black bg-white px-3 py-1.5 text-xs font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-6px_6px_0_#000000]")}
-              onClick={() => setExpandedOpen(true)}
-              title="在大窗口中编辑原始材料"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-              放大
-            </button>
-          </div>
-
-          <textarea
-            className="min-h-[220px] w-full resize-y rounded-[20px] border border-[#dad4c8] bg-white px-4 py-3 text-sm leading-6 text-black outline-none transition placeholder:text-[#9f9b93] focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
-            value={rawInput}
-            onChange={(e) => {
-              onRawInputChange(e.target.value);
-              if (resumeSuccess) setResumeSuccess(null);
-              if (resumeError) setResumeError(null);
-            }}
-            placeholder={RESUME_PLACEHOLDER}
-            spellCheck={false}
-            aria-label="AI 生成用原始材料"
-          />
-
-          <div className="mt-3 flex flex-col gap-2">
-            <Button
-              type="button"
-              disabled={resumeLoading}
-              className="h-11 rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
-              onClick={handleGenerateResume}
-            >
-              {resumeLoading ? (
-                <>
-                  <WandSparkles className="h-4 w-4 animate-pulse" />
-                  正在生成 Markdown 草稿...
-                </>
-              ) : (
-                <>
-                  <WandSparkles className="h-4 w-4" />
-                  生成草稿并写入编辑器
-                </>
-              )}
-            </Button>
-          </div>
-
-          {resumeLoading ? (
-            <div className={cn(clayShadow, "mt-3 rounded-2xl border border-[#dad4c8] bg-[#3bd3fd] px-4 py-3 text-sm text-[#01418d]")}>
-              正在向模型发送请求并整理简历结构，请稍候。
-            </div>
-          ) : null}
-          {resumeSuccess ? (
-            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#84e7a5] px-4 py-3 text-sm text-[#02492a]")}>
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{resumeSuccess}</span>
-            </div>
-          ) : null}
-          {resumeError ? (
-            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#fc7981] px-4 py-3 text-sm text-[#5d1720]")}>
-              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{resumeError}</span>
-            </div>
-          ) : null}
+    <div className={cn(siteSans.className, "space-y-3")}>
+      {/* Resume draft */}
+      <div className="rounded-[var(--ui-radius)] border border-[--ui-border] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs font-medium text-[--ui-text-muted]">简历草稿</p>
+          <button
+            type="button"
+            className={btnSecondary}
+            onClick={() => setExpandedOpen(true)}
+            title="在大窗口中编辑"
+          >
+            <Maximize2 className="h-3 w-3" />
+            放大
+          </button>
         </div>
 
-        <div className={cn(clayShadow, "rounded-[24px] border border-[#dad4c8] bg-white p-4")}>
-          <div className="mb-3 flex items-start gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-black bg-[#f8cc65] text-black">
-              <Paintbrush2 className="h-4.5 w-4.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className={cn(monoLabel, "text-[#55534e]")}>Style prompt</p>
-              <p className="mt-1 text-sm font-semibold text-black">样式助手</p>
-            </div>
-          </div>
+        <textarea
+          className="min-h-[100px] w-full resize-y rounded-[4px] border border-[--ui-border] bg-[--ui-bg-subtle] px-3 py-2 text-xs leading-5 text-[--ui-text] outline-none placeholder:text-[--ui-text-muted] focus:border-[--ui-text]"
+          value={rawInput}
+          onChange={(e) => {
+            onRawInputChange(e.target.value);
+            if (resumeSuccess) setResumeSuccess(null);
+            if (resumeError) setResumeError(null);
+          }}
+          placeholder={RESUME_PLACEHOLDER}
+          spellCheck={false}
+          aria-label="AI 生成用原始材料"
+        />
 
-          <textarea
-            className="min-h-[120px] w-full resize-y rounded-[20px] border border-[#dad4c8] bg-[#faf9f7] px-4 py-3 text-sm leading-6 text-black outline-none transition placeholder:text-[#9f9b93] focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
-            value={stylePrompt}
-            onChange={(e) => {
-              onStylePromptChange(e.target.value);
-              if (styleSuccess) setStyleSuccess(null);
-              if (styleError) setStyleError(null);
-            }}
-            placeholder={STYLE_PLACEHOLDER}
-            spellCheck={false}
-            aria-label="样式助手需求描述"
-          />
+        <button
+          type="button"
+          className={cn(btnPrimary, "mt-2 w-full")}
+          disabled={resumeLoading}
+          onClick={handleGenerateResume}
+        >
+          <WandSparkles className={cn("h-3.5 w-3.5", resumeLoading && "animate-pulse")} />
+          {resumeLoading ? "生成中..." : "生成草稿"}
+        </button>
 
-          <div className="mt-3 flex flex-col gap-2">
-            <Button
-              type="button"
-              disabled={styleLoading}
-              className="h-11 rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#3bd3fd] hover:shadow-[-7px_7px_0_#000000]"
-              onClick={handleGenerateStyle}
-            >
-              {styleLoading ? (
-                <>
-                  <WandSparkles className="h-4 w-4 animate-pulse" />
-                  正在生成样式...
-                </>
-              ) : (
-                <>
-                  <WandSparkles className="h-4 w-4" />
-                  生成样式并应用
-                </>
-              )}
-            </Button>
-          </div>
-
-          <div className={cn(clayShadow, "mt-4 rounded-2xl border border-[#dad4c8] bg-[#faf9f7] p-4")}>
-            <p className={cn(monoLabel, "text-[#55534e]")}>
-              保存当前样式
-            </p>
-            <input
-              type="text"
-              value={templateName}
-              onChange={(e) => setTemplateName(e.target.value)}
-              placeholder="模板名称，例如：技术风格细横线"
-              className="mt-3 w-full rounded-2xl border border-[#dad4c8] bg-white px-4 py-3 text-sm text-black outline-none transition focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
-            />
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-7px_7px_0_#000000]"
-                onClick={handleSaveTemplate}
-              >
-                保存为本地模板
-              </Button>
-            </div>
-          </div>
-
-          {savedStyleTemplates.length > 0 ? (
-            <div className={cn(clayShadow, "mt-4 rounded-2xl border border-[#dad4c8] bg-[#faf9f7] p-4")}>
-              <p className={cn(monoLabel, "text-[#55534e]")}>
-                本地模板
-              </p>
-              <div className="mt-3 space-y-2">
-                {savedStyleTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className={cn(clayShadow, "rounded-2xl border border-[#dad4c8] bg-white px-3 py-3")}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-black">
-                          {template.name}
-                        </p>
-                        {template.summary ? (
-                          <p className="mt-1 text-xs leading-5 text-[#55534e]">
-                            {template.summary}
-                          </p>
-                        ) : null}
-                      </div>
-                      <button
-                        type="button"
-                        className="rounded-full border border-[#dad4c8] bg-white p-2 text-[#55534e] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:text-black hover:shadow-[-5px_5px_0_#000000]"
-                        onClick={() => onDeleteStyleTemplate(template.id)}
-                        aria-label={`删除模板 ${template.name}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
-                        onClick={() => {
-                          onApplyStyleTemplate(template.css);
-                          setTemplateName(template.name);
-                          setGeneratedTemplate({
-                            name: template.name,
-                            css: template.css,
-                            summary: template.summary,
-                          });
-                          setStyleSuccess(`已应用本地模板“${template.name}”。`);
-                          setStyleError(null);
-                        }}
-                      >
-                        应用
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {styleLoading ? (
-            <div className={cn(clayShadow, "mt-3 rounded-2xl border border-[#dad4c8] bg-[#3bd3fd] px-4 py-3 text-sm text-[#01418d]")}>
-              正在根据你的描述生成 CSS，并同步到预览与导出样式。
-            </div>
-          ) : null}
-          {styleSuccess ? (
-            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#84e7a5] px-4 py-3 text-sm text-[#02492a]")}>
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{styleSuccess}</span>
-            </div>
-          ) : null}
-          {styleError ? (
-            <div className={cn(clayShadow, "mt-3 flex items-start gap-2 rounded-2xl border border-[#dad4c8] bg-[#fc7981] px-4 py-3 text-sm text-[#5d1720]")}>
-              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{styleError}</span>
-            </div>
-          ) : null}
-        </div>
+        {resumeSuccess ? <StatusBar type="success" message={resumeSuccess} /> : null}
+        {resumeError ? <StatusBar type="error" message={resumeError} /> : null}
       </div>
 
+      {/* Style assistant */}
+      <div className="rounded-[var(--ui-radius)] border border-[--ui-border] p-3">
+        <p className="mb-2 text-xs font-medium text-[--ui-text-muted]">样式助手</p>
+
+        <textarea
+          className="min-h-[80px] w-full resize-y rounded-[4px] border border-[--ui-border] bg-[--ui-bg-subtle] px-3 py-2 text-xs leading-5 text-[--ui-text] outline-none placeholder:text-[--ui-text-muted] focus:border-[--ui-text]"
+          value={stylePrompt}
+          onChange={(e) => {
+            onStylePromptChange(e.target.value);
+            if (styleSuccess) setStyleSuccess(null);
+            if (styleError) setStyleError(null);
+          }}
+          placeholder={STYLE_PLACEHOLDER}
+          spellCheck={false}
+          aria-label="样式描述"
+        />
+
+        <button
+          type="button"
+          className={cn(btnPrimary, "mt-2 w-full")}
+          disabled={styleLoading}
+          onClick={handleGenerateStyle}
+        >
+          <WandSparkles className={cn("h-3.5 w-3.5", styleLoading && "animate-pulse")} />
+          {styleLoading ? "生成中..." : "生成样式"}
+        </button>
+
+        {styleSuccess ? <StatusBar type="success" message={styleSuccess} /> : null}
+        {styleError ? <StatusBar type="error" message={styleError} /> : null}
+
+        {/* Save template */}
+        <div className="mt-3 border-t border-[--ui-border] pt-3">
+          <input
+            type="text"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            placeholder="模板名称"
+            className="w-full rounded-[4px] border border-[--ui-border] bg-white px-3 py-1.5 text-xs text-[--ui-text] outline-none focus:border-[--ui-text]"
+          />
+          <button
+            type="button"
+            className={cn(btnSecondary, "mt-2 w-full")}
+            onClick={handleSaveTemplate}
+          >
+            保存为本地模板
+          </button>
+        </div>
+
+        {/* Saved templates */}
+        {savedStyleTemplates.length > 0 ? (
+          <div className="mt-3 space-y-2 border-t border-[--ui-border] pt-3">
+            <p className="text-xs font-medium text-[--ui-text-muted]">本地模板</p>
+            {savedStyleTemplates.map((tpl) => (
+              <div
+                key={tpl.id}
+                className="flex items-center justify-between gap-2 rounded-[4px] border border-[--ui-border] px-3 py-2"
+              >
+                <span className="min-w-0 truncate text-xs text-[--ui-text]">{tpl.name}</span>
+                <div className="flex shrink-0 gap-1">
+                  <button
+                    type="button"
+                    className={cn(btnSecondary, "px-2 py-1")}
+                    onClick={() => {
+                      onApplyStyleTemplate(tpl.css);
+                      setTemplateName(tpl.name);
+                      setGeneratedTemplate({ name: tpl.name, css: tpl.css, summary: tpl.summary });
+                      setStyleSuccess(`已应用"${tpl.name}"。`);
+                      setStyleError(null);
+                    }}
+                  >
+                    应用
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(btnSecondary, "px-2 py-1 hover:border-red-300 hover:text-red-600")}
+                    onClick={() => onDeleteStyleTemplate(tpl.id)}
+                    aria-label={`删除 ${tpl.name}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Expanded modal */}
       {expandedOpen ? (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/25 p-4 backdrop-blur-[2px]"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="ai-expand-title"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setExpandedOpen(false);
-          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setExpandedOpen(false); }}
         >
           <div
-            className={cn(clayShadow, "flex max-h-[90vh] w-full max-w-3xl flex-col rounded-[32px] border border-[#dad4c8] bg-white p-5")}
+            className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[var(--ui-radius)] border border-[--ui-border] bg-white p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-[#eee9df] pb-3">
-              <div>
-                <h3
-                  id="ai-expand-title"
-                  className="text-base font-semibold text-black"
-                >
-                  编辑原始经历
-                </h3>
-                <p className="mt-1 text-xs leading-5 text-[#55534e]">
-                  适合粘贴长文本。生成成功后会直接写入左侧 Markdown 编辑区。
-                </p>
-              </div>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-semibold text-[--ui-text]">编辑原始经历</p>
               <button
                 type="button"
-                className="rounded-full border border-[#dad4c8] bg-white p-2 text-[#55534e] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:text-black hover:shadow-[-5px_5px_0_#000000]"
+                className={cn(btnSecondary, "p-1.5")}
                 onClick={() => setExpandedOpen(false)}
                 aria-label="关闭"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
             <textarea
               ref={expandedTextareaRef}
-              className="mt-4 min-h-[min(55vh,520px)] w-full flex-1 resize-y rounded-[24px] border border-[#dad4c8] bg-[#faf9f7] p-4 text-sm leading-6 text-black outline-none transition focus:border-[#01418d] focus:ring-2 focus:ring-[#3bd3fd]"
+              className="min-h-[min(55vh,480px)] w-full flex-1 resize-y rounded-[4px] border border-[--ui-border] bg-[--ui-bg-subtle] p-3 text-sm leading-6 text-[--ui-text] outline-none focus:border-[--ui-text]"
               value={rawInput}
               onChange={(e) => onRawInputChange(e.target.value)}
               placeholder={RESUME_PLACEHOLDER}
               spellCheck={false}
             />
-            <div className="mt-2 flex items-center justify-between text-xs text-[#9f9b93]">
-              <span>{rawInput.length} 字</span>
-              <span className="hidden sm:inline">Esc 关闭 · 点击背景可关闭</span>
-            </div>
-            <div className="mt-4 flex flex-wrap justify-end gap-2 border-t border-[#eee9df] pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#f8cc65] hover:shadow-[-7px_7px_0_#000000]"
-                onClick={() => setExpandedOpen(false)}
-              >
-                取消
-              </Button>
-              <Button
-                type="button"
-                className="rounded-full border border-black bg-white text-black hover:-translate-y-1 hover:-rotate-2 hover:bg-[#84e7a5] hover:shadow-[-7px_7px_0_#000000]"
-                disabled={resumeLoading}
-                onClick={handleGenerateResume}
-              >
-                {resumeLoading ? "生成中..." : "生成草稿并写入编辑器"}
-              </Button>
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-xs text-[--ui-text-muted]">{rawInput.length} 字 · Esc 关闭</span>
+              <div className="flex gap-2">
+                <button type="button" className={btnSecondary} onClick={() => setExpandedOpen(false)}>
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className={btnPrimary}
+                  disabled={resumeLoading}
+                  onClick={handleGenerateResume}
+                >
+                  {resumeLoading ? "生成中..." : "生成草稿"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       ) : null}
-    </>
+    </div>
+  );
+}
+
+function StatusBar({ type, message }: { type: "success" | "error"; message: string }) {
+  return (
+    <div
+      className={cn(
+        "mt-2 flex items-start gap-1.5 rounded-[4px] border px-3 py-2 text-xs",
+        type === "success"
+          ? "border-[--ui-border] bg-[--ui-bg-subtle] text-[--ui-text]"
+          : "border-red-200 bg-red-50 text-red-700"
+      )}
+    >
+      {type === "success" ? (
+        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+      ) : (
+        <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+      )}
+      <span>{message}</span>
+    </div>
   );
 }
