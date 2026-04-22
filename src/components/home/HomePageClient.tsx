@@ -7,15 +7,10 @@ import { ArrowRight } from "lucide-react";
 import PageFooter from "@/components/PageFooter";
 import PageHeader from "@/components/PageHeader";
 import { ThemeList } from "@/lib/constants";
-import type { BlogPost } from "@/app/blog/utils";
 import { cn } from "@/lib/utils";
 import { siteSans } from "@/lib/siteFonts";
 
 type Language = "en" | "zh";
-
-interface HomePageClientProps {
-  latestPosts: BlogPost[];
-}
 
 const STORAGE_KEY = "homepage-language";
 const primaryTemplates = Object.keys(ThemeList).slice(0, 3);
@@ -49,7 +44,7 @@ const copy = {
   },
 } as const;
 
-export default function HomePageClient({ latestPosts: _ }: HomePageClientProps) {
+export default function HomePageClient() {
   const [language, setLanguage] = useState<Language>("en");
 
   useEffect(() => {

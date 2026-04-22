@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { baseUrl, getBlogPosts } from "@/app/blog/utils";
+import { baseUrl } from "@/app/blog/utils";
 import HomePageClient from "@/components/home/HomePageClient";
 
 export const metadata: Metadata = {
@@ -26,13 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const latestPosts = getBlogPosts()
-    .sort(
-      (a, b) =>
-        new Date(b.metadata.publishedAt).getTime() -
-        new Date(a.metadata.publishedAt).getTime()
-    )
-    .slice(0, 3);
-
-  return <HomePageClient latestPosts={latestPosts} />;
+  return <HomePageClient />;
 }

@@ -120,7 +120,6 @@ function EditorPageContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -128,21 +127,11 @@ function EditorPageContent() {
     setLlmSettings(loadLlmSettings());
   }, []);
 
-  const stampSavedTime = useCallback(() => {
-    setLastSavedAt(
-      new Date().toLocaleTimeString("zh-CN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
-  }, []);
-
   const updateMarkdown = useCallback(
     (value: string) => {
       setMarkdownStorage(value);
-      stampSavedTime();
     },
-    [setMarkdownStorage, stampSavedTime]
+    [setMarkdownStorage]
   );
 
   const handleLlmSettingsChange = useCallback((settings: LlmSettings) => {
