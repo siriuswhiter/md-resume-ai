@@ -5,7 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { Github } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { siteMono, siteSans } from "@/lib/siteFonts";
+import { siteSans } from "@/lib/siteFonts";
 
 interface LanguageOption {
   code: string;
@@ -24,7 +24,6 @@ interface PageHeaderProps {
 export default function PageHeader({
   brandName = "Markdown Resume AI",
   githubLabel = "GitHub",
-  languageLabel = "Language",
   languages,
   currentLanguage,
   onLanguageChange,
@@ -33,71 +32,49 @@ export default function PageHeader({
     <header
       className={cn(
         siteSans.className,
-        "sticky top-0 z-30 border-b border-[#dad4c8] bg-[#faf9f7]/95 backdrop-blur"
+        "sticky top-0 z-30 border-b border-[--ui-border] bg-white/95 backdrop-blur"
       )}
     >
-      <div className="container mx-auto px-6 py-4 md:px-10 xl:px-16">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/" className="inline-flex items-center gap-3 text-black">
-            <span className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-[#dad4c8] bg-white shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]">
-              <Logo />
-            </span>
-            <span>
-              <span
-                className={cn(
-                  siteMono.className,
-                  "block text-[11px] uppercase tracking-[0.24em] text-[#55534e]"
-                )}
-              >
-                Resume workspace
-              </span>
-              <span className="block text-xl font-semibold tracking-[-0.04em] md:text-2xl">
-                {brandName}
-              </span>
-            </span>
+      <div className="container mx-auto flex items-center justify-between px-6 py-3 md:px-10 xl:px-16">
+        <Link href="/" className="inline-flex items-center gap-2.5 text-[--ui-text]">
+          <span className="flex h-8 w-8 items-center justify-center rounded-[var(--ui-radius)] border border-[--ui-border]">
+            <Logo />
+          </span>
+          <span className="text-sm font-semibold tracking-tight">{brandName}</span>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          {languages && languages.length > 0 && onLanguageChange ? (
+            <div className="flex items-center gap-1 rounded-[var(--ui-radius)] border border-[--ui-border] p-0.5">
+              {languages.map((language) => {
+                const isActive = language.code === currentLanguage;
+                return (
+                  <button
+                    key={language.code}
+                    type="button"
+                    onClick={() => onLanguageChange(language.code)}
+                    className={`rounded-[4px] px-3 py-1 text-xs font-medium transition-colors ${
+                      isActive
+                        ? "bg-[--ui-text] text-white"
+                        : "text-[--ui-text-muted] hover:text-[--ui-text]"
+                    }`}
+                    aria-pressed={isActive}
+                  >
+                    {language.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          <Link
+            href="https://github.com/siriuswhiter/md-resume-ai"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 rounded-[var(--ui-radius)] border border-[--ui-border] px-3 py-1.5 text-xs font-medium text-[--ui-text-muted] transition-colors hover:border-[--ui-text] hover:text-[--ui-text]"
+          >
+            <Github size={14} />
+            {githubLabel}
           </Link>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {languages && languages.length > 0 && onLanguageChange ? (
-              <div className="inline-flex items-center gap-1 rounded-full border border-[#dad4c8] bg-white p-1 shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]">
-                <span
-                  className={cn(
-                    siteMono.className,
-                    "px-2 text-[11px] uppercase tracking-[0.22em] text-[#55534e]"
-                  )}
-                >
-                  {languageLabel}
-                </span>
-                {languages.map((language) => {
-                  const isActive = language.code === currentLanguage;
-                  return (
-                    <button
-                      key={language.code}
-                      type="button"
-                      onClick={() => onLanguageChange(language.code)}
-                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition-transform duration-200 ${
-                        isActive
-                          ? "bg-[#000000] text-white"
-                          : "text-[#333333] hover:-rotate-2 hover:-translate-y-0.5 hover:bg-[#f8cc65]"
-                      }`}
-                      aria-pressed={isActive}
-                    >
-                      {language.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-
-            <Link
-              href="https://github.com/siriuswhiter/md-resume-ai"
-              target="_blank"
-              className="inline-flex items-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-sm font-medium text-black shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)] transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#3bd3fd] hover:shadow-[-7px_7px_0_#000000]"
-            >
-              <Github size={20} />
-              {githubLabel}
-            </Link>
-          </div>
         </div>
       </div>
     </header>
