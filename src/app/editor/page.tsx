@@ -6,13 +6,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Download,
-  FilePenLine,
-  KeyRound,
-  Layers3,
   Loader2,
-  PanelRight,
   ScanSearch,
-  Server,
+  Settings,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Editor from "@/components/editor/Editor";
@@ -41,7 +37,7 @@ import {
 import type { LlmSettings } from "@/lib/llmTypes";
 import type { SavedStyleTemplate } from "@/lib/styleAssistantTypes";
 import { cn } from "@/lib/utils";
-import { siteMono, siteSans } from "@/lib/siteFonts";
+import { siteSans } from "@/lib/siteFonts";
 
 type FeedbackTone = "info" | "success" | "error";
 
@@ -121,7 +117,6 @@ function EditorPageContent() {
   const [rawInput, setRawInput] = useLocalStorage<string>("RESUME_AI_RAW_INPUT", "");
 
   const [llmSettings, setLlmSettings] = useState<LlmSettings>(() => defaultLlmSettings());
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
@@ -170,7 +165,7 @@ function EditorPageContent() {
     setSavedStyleTemplates([nextTemplate, ...savedStyleTemplates]);
     setFeedback({
       tone: "success",
-      message: `样式模板“${template.name}”已保存到本地。`,
+      message: `样式模板"${template.name}"已保存到本地。`,
     });
   }, [savedStyleTemplates, setSavedStyleTemplates]);
 
@@ -184,7 +179,7 @@ function EditorPageContent() {
     if (target) {
       setFeedback({
         tone: "success",
-        message: `样式模板“${target.name}”已删除。`,
+        message: `样式模板"${target.name}"已删除。`,
       });
     }
   }, [savedStyleTemplates, setSavedStyleTemplates]);
@@ -271,7 +266,7 @@ function EditorPageContent() {
     setYPaddingScale(preset.yPaddingScale);
     setFeedback({
       tone: "success",
-      message: `版式密度已调整为“${preset.label}”。`,
+      message: `版式密度已调整为"${preset.label}"。`,
     });
   }, [setLineHeightScale, setXPaddingScale, setYPaddingScale]);
 
@@ -345,41 +340,8 @@ function EditorPageContent() {
     }
   };
 
-  const visibleCharacterCount = markdown.replace(/\s+/g, "").length;
-  const sectionCount = (markdown.match(/^##\s+/gm) ?? []).length;
-  const bulletCount = (markdown.match(/^\s*[-*]\s+/gm) ?? []).length;
-  const activeThemeKey = (theme in themePresetMeta ? theme : "tehran") as ThemeKey;
   const resumeTitle =
     markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "未命名简历";
-  const structureHint =
-    sectionCount >= 3
-      ? "章节结构已经成型，可继续压缩措辞和补充量化结果。"
-      : "建议至少补齐教育、工作经历、项目或技能等核心章节。";
-  const documentStatus = isExporting
-    ? "导出中"
-    : lastSavedAt
-      ? `已自动保存 · ${lastSavedAt}`
-      : markdownHydrated
-        ? "已从本机恢复"
-        : "正在加载";
-  const aiStatus = llmSettings.useServerRoute
-    ? "服务端 AI 已就绪"
-    : llmSettings.apiKey.trim()
-      ? "本机 Key 已配置"
-      : "AI 待配置";
-  const compactStats = [
-    { label: "字数", value: visibleCharacterCount.toLocaleString() },
-    { label: "章节", value: sectionCount.toString() },
-    { label: "要点", value: bulletCount.toString() },
-  ];
-  const monoLabel = cn(
-    siteMono.className,
-    "text-[11px] font-normal uppercase tracking-[0.24em]"
-  );
-  const clayShadow =
-    "shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_-1px_1px_rgba(0,0,0,0.04)_inset,_0_-0.5px_1px_rgba(0,0,0,0.05)]";
-  const clayButton =
-    "inline-flex items-center gap-2 rounded-full border border-black px-4 py-2 text-sm font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:shadow-[-7px_7px_0_#000000]";
 
   const feedbackStyles: Record<
     FeedbackTone,
@@ -387,15 +349,15 @@ function EditorPageContent() {
   > = {
     info: {
       icon: ScanSearch,
-      className: "border-[#dad4c8] bg-[#3bd3fd] text-[#01418d]",
+      className: "border-[--ui-border] bg-[--ui-bg-subtle] text-[--ui-text]",
     },
     success: {
       icon: CheckCircle2,
-      className: "border-[#dad4c8] bg-[#84e7a5] text-[#02492a]",
+      className: "border-[--ui-border] bg-[--ui-bg-subtle] text-[--ui-text]",
     },
     error: {
       icon: AlertCircle,
-      className: "border-[#dad4c8] bg-[#fc7981] text-[#5d1720]",
+      className: "border-red-200 bg-red-50 text-red-800",
     },
   };
 
@@ -403,116 +365,47 @@ function EditorPageContent() {
     <div
       className={cn(
         siteSans.className,
-        "min-h-screen bg-[#faf9f7] text-black lg:flex lg:h-screen lg:flex-col lg:overflow-hidden"
+        "min-h-screen bg-[--ui-bg-subtle] text-[--ui-text] lg:flex lg:h-screen lg:flex-col lg:overflow-hidden"
       )}
     >
-      <header className="shrink-0 border-b border-[#dad4c8] bg-[#faf9f7]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1720px] flex-wrap items-center gap-2 px-3 py-2 lg:px-4">
+      <header className="shrink-0 border-b border-[--ui-border] bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1720px] items-center gap-4 px-4 py-2.5">
           <Link
             href="/"
-            className={cn(clayShadow, clayButton, "bg-white hover:bg-[#f8cc65]")}
+            className="text-sm font-semibold text-[--ui-text] hover:opacity-70 transition-opacity"
           >
-            <FilePenLine className="h-4 w-4" />
             Markdown Resume AI
           </Link>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="max-w-full truncate text-sm font-semibold text-black">
-                {resumeTitle}
-              </p>
-              <span
-                className={cn(
-                  clayShadow,
-                  monoLabel,
-                  "rounded-full border border-[#dad4c8] bg-[#84e7a5] px-2.5 py-1 text-[#02492a]"
-                )}
-              >
-                {documentStatus}
-              </span>
-              <span
-                className={cn(
-                  clayShadow,
-                  monoLabel,
-                  "rounded-full border border-[#dad4c8] bg-[#f8cc65] px-2.5 py-1 text-[#9d6a09]"
-                )}
-              >
-                {aiStatus}
-              </span>
-              <span
-                className={cn(
-                  clayShadow,
-                  monoLabel,
-                  "hidden rounded-full border border-[#dad4c8] bg-[#c1b0ff] px-2.5 py-1 text-[#32037d] min-[960px]:inline-flex"
-                )}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <Layers3 className="h-3.5 w-3.5" />
-                  {themePresetMeta[activeThemeKey].label}
-                </span>
-              </span>
-            </div>
-            <div className={cn("mt-1 hidden flex-wrap items-center gap-2 xl:flex", monoLabel, "text-[#55534e]")}>
-              <span className="truncate">{structureHint}</span>
-              {compactStats.map((item) => (
-                <span
-                  key={item.label}
-                  className={cn(
-                    clayShadow,
-                    "inline-flex items-center gap-1.5 rounded-full border border-[#dad4c8] bg-white px-2.5 py-1 text-[#55534e]"
-                  )}
-                >
-                  <span className="text-black">{item.value}</span>
-                  {item.label}
-                </span>
-              ))}
-            </div>
-          </div>
+          <span className="text-[--ui-border]">/</span>
+
+          <p className="truncate text-sm text-[--ui-text-muted]">{resumeTitle}</p>
 
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
-              className={cn(clayShadow, clayButton, "bg-white hover:bg-[#3bd3fd]")}
+              className="inline-flex items-center gap-1.5 rounded-[var(--ui-radius)] border border-[--ui-border] px-3 py-1.5 text-xs font-medium text-[--ui-text-muted] transition-colors hover:border-[--ui-text] hover:text-[--ui-text]"
               onClick={() => setSettingsOpen(true)}
+              aria-label="设置"
             >
-              {llmSettings.useServerRoute ? (
-                <Server className="h-4 w-4" />
-              ) : (
-                <KeyRound className="h-4 w-4" />
-              )}
-              AI 配置
+              <Settings className="h-3.5 w-3.5" />
+              设置
             </button>
 
             <button
               type="button"
-              className={cn(
-                clayShadow,
-                clayButton,
-                "hidden bg-white hover:bg-[#c1b0ff] lg:inline-flex min-[1380px]:hidden"
-              )}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <PanelRight className="h-4 w-4" />
-              打开工具抽屉
-            </button>
-
-            <button
-              type="button"
-              className={cn(
-                clayShadow,
-                "inline-flex items-center gap-2 rounded-full border border-black bg-white px-4 py-2 text-sm font-medium text-black transition-transform duration-200 hover:-translate-y-1 hover:-rotate-2 hover:bg-[#fc7981] hover:shadow-[-7px_7px_0_#000000] disabled:cursor-not-allowed disabled:border-[#9f9b93] disabled:bg-[#eee9df] disabled:text-[#9f9b93] disabled:shadow-none"
-              )}
+              className="inline-flex items-center gap-1.5 rounded-[var(--ui-radius)] bg-[--ui-text] px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
               onClick={handleExportPdf}
               disabled={isExporting}
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   导出中...
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4" />
+                  <Download className="h-3.5 w-3.5" />
                   导出 PDF
                 </>
               )}
@@ -545,9 +438,7 @@ function EditorPageContent() {
         >
           {feedback ? (
             <div
-              className={cn(`flex items-start gap-3 rounded-[24px] border px-4 py-3 text-sm ${clayShadow} ${
-                feedbackStyles[feedback.tone].className
-              }`)}
+              className={cn("flex items-start gap-3 rounded-[var(--ui-radius)] border px-4 py-3 text-sm", feedbackStyles[feedback.tone].className)}
             >
               {(() => {
                 const Icon = feedbackStyles[feedback.tone].icon;
@@ -557,26 +448,10 @@ function EditorPageContent() {
             </div>
           ) : null}
 
-          <div className="grid min-h-0 flex-1 gap-3 min-[1380px]:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
+          <div className="grid min-h-0 flex-1 gap-3 min-[1280px]:grid-cols-[minmax(0,1fr)_260px] lg:overflow-hidden">
             <div className="min-w-0 min-h-0 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-                <section className={cn(clayShadow, "flex min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#dad4c8] bg-white p-3")}>
-                  <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className={cn(monoLabel, "text-[#55534e]")}>Workspace</p>
-                      <p className="mt-1 text-sm font-semibold text-black">
-                        Markdown 编辑区
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-[#84e7a5] px-2.5 py-1 text-[#02492a]")}>
-                        自动保存
-                      </span>
-                      <span className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-white px-2.5 py-1 text-[#55534e]")}>
-                        Markdown 输入
-                      </span>
-                    </div>
-                  </div>
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--ui-radius)] border border-[--ui-border] bg-white">
                   <div className="min-h-0 flex-1 overflow-hidden">
                     <Editor
                       markdown={markdown}
@@ -586,18 +461,7 @@ function EditorPageContent() {
                   </div>
                 </section>
 
-                <section className={cn(clayShadow, "flex min-h-0 flex-col overflow-hidden rounded-[32px] border border-[#dad4c8] bg-white p-3")}>
-                  <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className={cn(monoLabel, "text-[#55534e]")}>Paper view</p>
-                      <p className="mt-1 text-sm font-semibold text-black">
-                        实时预览
-                      </p>
-                    </div>
-                    <div className={cn(clayShadow, monoLabel, "rounded-full border border-[#dad4c8] bg-[#f8cc65] px-2.5 py-1 text-[#9d6a09]")}>
-                      A4 分页预览
-                    </div>
-                  </div>
+                <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--ui-radius)] border border-[--ui-border] bg-[--ui-bg-subtle]">
                   <div className="min-h-0 flex-1 overflow-hidden">
                     <Preview
                       content={markdown}
@@ -622,7 +486,7 @@ function EditorPageContent() {
               </div>
             </div>
 
-            <aside className="hidden h-full min-h-0 w-[320px] overflow-hidden min-[1380px]:block">
+            <aside className="hidden h-full min-h-0 w-[260px] overflow-hidden min-[1280px]:block">
               <Sidebar
                 variant="inline"
                 onThemeChange={handleThemeChange}
@@ -664,46 +528,6 @@ function EditorPageContent() {
           </div>
         </div>
       </div>
-
-      <Sidebar
-        variant="drawer"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onThemeChange={handleThemeChange}
-        onDensityPresetChange={handleDensityPresetChange}
-        onFontChange={setFont}
-        onFontSizeChange={setFontScale}
-        onLineHeightChange={setLineHeightScale}
-        onXPaddingChange={setXPaddingScale}
-        onYPaddingChange={setYPaddingScale}
-        fontScale={fontScale}
-        lineHeightScale={lineHeightScale}
-        headingScale={headingScale}
-        onHeadingChange={setHeadingScale}
-        xPaddingScale={xPaddingScale}
-        yPaddingScale={yPaddingScale}
-        selectedTheme={theme}
-        headerColor={headerColor}
-        setHeaderColor={setHeaderColor}
-        textColor={textColor}
-        setTextColor={setTextColor}
-        linkColor={linkColor}
-        setLinkColor={setLinkColor}
-        customCss={customCss}
-        onCustomCssChange={setCustomCss}
-        font={font}
-        aiRawInput={rawInput}
-        onAiRawInputChange={setRawInput}
-        llmSettings={llmSettings}
-        onMarkdownGenerated={updateMarkdown}
-        theme={theme}
-        stylePrompt={stylePrompt}
-        onStylePromptChange={setStylePrompt}
-        savedStyleTemplates={savedStyleTemplates}
-        onSaveStyleTemplate={handleSaveStyleTemplate}
-        onApplyStyleTemplate={handleApplyStyleTemplate}
-        onDeleteStyleTemplate={handleDeleteStyleTemplate}
-      />
 
       <LlmSettingsModal
         open={settingsOpen}
