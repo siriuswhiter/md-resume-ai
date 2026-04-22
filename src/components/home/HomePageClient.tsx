@@ -19,10 +19,11 @@ const copy = {
   en: {
     brandName: "Markdown Resume AI",
     githubLabel: "GitHub",
-    heroTitle: "Write your resume in Markdown. Preview live. Export to PDF.",
+    heroTitle: "AI-assisted resume writing. Live preview. One-click PDF.",
     heroDescription:
-      "Pick a template, edit in plain Markdown, and download a clean PDF — all in one place.",
-    primaryCta: "Start Building",
+      "Paste your raw experience — AI drafts your Markdown resume instantly. Pick a template, refine the style, and export a clean PDF, all in one workspace.",
+    features: ["AI Draft", "AI Style", "Live Preview", "PDF Export"] as string[],
+    primaryCta: "Start with AI",
     secondaryCta: "Browse Templates",
     templatesLabel: "Templates",
     openInEditor: "Open in editor",
@@ -32,10 +33,11 @@ const copy = {
   zh: {
     brandName: "Markdown Resume AI",
     githubLabel: "GitHub",
-    heroTitle: "用 Markdown 写简历，实时预览，一键导出 PDF。",
+    heroTitle: "AI 辅助写简历，实时预览，一键导出 PDF。",
     heroDescription:
-      "选模板、在编辑器里写 Markdown、下载 PDF，全部在一个页面完成。",
-    primaryCta: "开始制作",
+      "粘贴原始经历，AI 自动生成 Markdown 简历草稿。选模板、精调样式、导出 PDF，全程一个页面搞定。",
+    features: ["AI 生成草稿", "AI 样式助手", "实时预览", "PDF 导出"] as string[],
+    primaryCta: "用 AI 开始制作",
     secondaryCta: "浏览模板",
     templatesLabel: "模板",
     openInEditor: "在编辑器中打开",
@@ -91,7 +93,17 @@ export default function HomePageClient() {
           <p className="mt-3 max-w-xl text-sm leading-6 text-[--ui-text-muted]">
             {t.heroDescription}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {t.features.map((f) => (
+              <span
+                key={f}
+                className="rounded-full border border-[--ui-border] px-2.5 py-0.5 text-[11px] font-medium text-[--ui-text-muted]"
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href="/editor?template=mashhad"
               className="inline-flex items-center gap-2 rounded-[var(--ui-radius)] bg-[--ui-text] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-80"
