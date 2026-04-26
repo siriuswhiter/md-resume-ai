@@ -50,7 +50,7 @@ interface ProjectMetaParts {
     date: string;
 }
 
-const PROJECT_META_SEPARATOR = /\s*[·•]\s*/;
+const PROJECT_META_SEPARATOR = /\s*[·•|｜]\s*/;
 
 const flattenNodeText = (node: ReactNode): string => {
     if (typeof node === "string" || typeof node === "number") {
@@ -112,6 +112,51 @@ const markdownComponents: Components = {
                 <span className="resume-meta-center">{metaParts.role}</span>
                 <span className="resume-meta-date">{metaParts.date}</span>
             </p>
+        );
+    },
+    h3({ children, className, ...props }) {
+        const metaParts = extractProjectMetaParts(children);
+
+        if (!metaParts) {
+            return <h3 className={className} {...props}>{children}</h3>;
+        }
+
+        return (
+            <h3 className={cn(className, "resume-meta-row")} {...props}>
+                <span className="resume-meta-title">{metaParts.title}</span>
+                <span className="resume-meta-center">{metaParts.role}</span>
+                <span className="resume-meta-date">{metaParts.date}</span>
+            </h3>
+        );
+    },
+    h4({ children, className, ...props }) {
+        const metaParts = extractProjectMetaParts(children);
+
+        if (!metaParts) {
+            return <h4 className={className} {...props}>{children}</h4>;
+        }
+
+        return (
+            <h4 className={cn(className, "resume-meta-row")} {...props}>
+                <span className="resume-meta-title">{metaParts.title}</span>
+                <span className="resume-meta-center">{metaParts.role}</span>
+                <span className="resume-meta-date">{metaParts.date}</span>
+            </h4>
+        );
+    },
+    li({ children, className, ...props }) {
+        const metaParts = extractProjectMetaParts(children);
+
+        if (!metaParts) {
+            return <li className={className} {...props}>{children}</li>;
+        }
+
+        return (
+            <li className={cn(className, "resume-meta-row")} {...props}>
+                <span className="resume-meta-title">{metaParts.title}</span>
+                <span className="resume-meta-center">{metaParts.role}</span>
+                <span className="resume-meta-date">{metaParts.date}</span>
+            </li>
         );
     },
 };

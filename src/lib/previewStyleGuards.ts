@@ -58,6 +58,12 @@ const CONTROLLED_PREVIEW_STYLE_GUARD_CSS = `
   margin-top: 0.25rem;
 }
 
+.previewContainer ul li.resume-meta-row::before,
+.previewContainer ol li.resume-meta-row::before {
+  content: none !important;
+  display: none !important;
+}
+
 .previewContainer .resume-tag-list {
   display: flex;
   flex-wrap: wrap;
