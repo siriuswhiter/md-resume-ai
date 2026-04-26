@@ -135,10 +135,8 @@ export default function Sidebar({
         "sidebar flex h-full flex-col rounded-[var(--ui-radius)] border border-[--ui-border] bg-white"
       )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[--ui-border] px-4 py-3">
-        <p className="text-xs font-semibold text-[--ui-text]">样式面板</p>
-        {variant === "drawer" && onClose ? (
+      {variant === "drawer" && onClose ? (
+        <div className="flex items-center justify-end border-b border-[--ui-border] px-4 py-3">
           <button
             type="button"
             className="rounded-[4px] border border-[--ui-border] p-1.5 text-[--ui-text-muted] transition-colors hover:text-[--ui-text]"
@@ -147,8 +145,8 @@ export default function Sidebar({
           >
             <X className="h-4 w-4" />
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {/* Tabs */}
       <div className="flex border-b border-[--ui-border]">

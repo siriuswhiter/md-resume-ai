@@ -48,11 +48,27 @@ interface FeedbackState {
   message: string;
 }
 
+type ResumeStyleSettings = {
+  theme: string;
+  font: string;
+  headingScale: number;
+  fontScale: number;
+  lineHeightScale: number;
+  xPaddingScale: number;
+  yPaddingScale: number;
+  headerColor: string;
+  textColor: string;
+  linkColor: string;
+  customCss: string;
+  stylePrompt: string;
+};
+
 type JobResumeVersion = {
   id: string;
   name: string;
   jobTarget: string;
   markdown: string;
+  styles?: ResumeStyleSettings;
   createdAt: string;
   updatedAt: string;
 };
@@ -150,6 +166,21 @@ function EditorPageContent() {
   const activeMarkdown = activeVersion?.markdown ?? masterMarkdown;
   const activeJobTarget = activeVersion?.jobTarget ?? jobTarget;
   const isMasterActive = activeDocumentId === "master" || !activeVersion;
+  const masterStyles: ResumeStyleSettings = {
+    theme,
+    font,
+    headingScale,
+    fontScale,
+    lineHeightScale,
+    xPaddingScale,
+    yPaddingScale,
+    headerColor,
+    textColor,
+    linkColor,
+    customCss,
+    stylePrompt,
+  };
+  const activeStyles = activeVersion?.styles ?? masterStyles;
 
   useEffect(() => {
     setLlmSettings(loadLlmSettings());
@@ -170,6 +201,60 @@ function EditorPageContent() {
       setMasterMarkdownStorage(value);
     },
     [activeVersion, jobVersions, setJobVersions, setMasterMarkdownStorage]
+  );
+
+  const updateActiveStyles = useCallback(
+    (patch: Partial<ResumeStyleSettings>) => {
+      if (activeVersion) {
+        setJobVersions(
+          jobVersions.map((item) =>
+            item.id === activeVersion.id
+              ? {
+                  ...item,
+                  styles: {
+                    ...masterStyles,
+                    ...item.styles,
+                    ...patch,
+                  },
+                  updatedAt: new Date().toISOString(),
+                }
+              : item
+          )
+        );
+        return;
+      }
+
+      if (patch.theme !== undefined) setTheme(patch.theme);
+      if (patch.font !== undefined) setFont(patch.font);
+      if (patch.headingScale !== undefined) setHeadingScale(patch.headingScale);
+      if (patch.fontScale !== undefined) setFontScale(patch.fontScale);
+      if (patch.lineHeightScale !== undefined) setLineHeightScale(patch.lineHeightScale);
+      if (patch.xPaddingScale !== undefined) setXPaddingScale(patch.xPaddingScale);
+      if (patch.yPaddingScale !== undefined) setYPaddingScale(patch.yPaddingScale);
+      if (patch.headerColor !== undefined) setHeaderColor(patch.headerColor);
+      if (patch.textColor !== undefined) setTextColor(patch.textColor);
+      if (patch.linkColor !== undefined) setLinkColor(patch.linkColor);
+      if (patch.customCss !== undefined) setCustomCss(patch.customCss);
+      if (patch.stylePrompt !== undefined) setStylePrompt(patch.stylePrompt);
+    },
+    [
+      activeVersion,
+      jobVersions,
+      masterStyles,
+      setCustomCss,
+      setFont,
+      setFontScale,
+      setHeaderColor,
+      setHeadingScale,
+      setJobVersions,
+      setLineHeightScale,
+      setLinkColor,
+      setStylePrompt,
+      setTextColor,
+      setTheme,
+      setXPaddingScale,
+      setYPaddingScale,
+    ]
   );
 
   const handleMasterGenerated = useCallback(
@@ -202,7 +287,7 @@ function EditorPageContent() {
   );
 
   const createJobVersion = useCallback(
-    (initial?: { name?: string; jobTarget?: string; markdown?: string }) => {
+    (initial?: { name?: string; jobTarget?: string; markdown?: string; styles?: ResumeStyleSettings }) => {
       const now = new Date().toISOString();
       const target = initial?.jobTarget?.trim() || jobTarget.trim();
       const next: JobResumeVersion = {
@@ -210,6 +295,7 @@ function EditorPageContent() {
         name: initial?.name?.trim() || target.split(/\s+/)[0] || `岗位 ${jobVersions.length + 1}`,
         jobTarget: target,
         markdown: initial?.markdown ?? masterMarkdown,
+        styles: initial?.styles ?? masterStyles,
         createdAt: now,
         updatedAt: now,
       };
@@ -217,7 +303,7 @@ function EditorPageContent() {
       setActiveDocumentId(next.id);
       return next;
     },
-    [jobTarget, jobVersions, masterMarkdown, setActiveDocumentId, setJobVersions]
+    [jobTarget, jobVersions, masterMarkdown, masterStyles, setActiveDocumentId, setJobVersions]
   );
 
   const handleAdaptedMarkdownGenerated = useCallback(
@@ -250,6 +336,7 @@ function EditorPageContent() {
         name: trimmedTarget.split(/\s+/)[0] || `岗位 ${jobVersions.length + 1}`,
         jobTarget: trimmedTarget,
         markdown: md,
+        styles: masterStyles,
         createdAt: now,
         updatedAt: now,
       };
@@ -260,7 +347,7 @@ function EditorPageContent() {
         message: `"${next.name}"适配简历已创建。`,
       });
     },
-    [activeVersion, jobVersions, setActiveDocumentId, setJobVersions]
+    [activeVersion, jobVersions, masterStyles, setActiveDocumentId, setJobVersions]
   );
 
   const handleDeleteJobVersion = useCallback(
@@ -305,8 +392,8 @@ function EditorPageContent() {
   }, [savedStyleTemplates, setSavedStyleTemplates]);
 
   const handleApplyStyleTemplate = useCallback((css: string) => {
-    setCustomCss(css);
-  }, [setCustomCss]);
+    updateActiveStyles({ customCss: css });
+  }, [updateActiveStyles]);
 
   const handleDeleteStyleTemplate = useCallback((id: string) => {
     const target = savedStyleTemplates.find((item) => item.id === id);
@@ -381,13 +468,27 @@ function EditorPageContent() {
   }, [activeDocumentId, jobVersions, jobVersionsHydrated, setActiveDocumentId]);
 
   useEffect(() => {
-    if (!(font in fonts)) return;
-    loadFont(fonts[font as FontKey]);
-  }, [font]);
+    if (!(activeStyles.font in fonts)) return;
+    loadFont(fonts[activeStyles.font as FontKey]);
+  }, [activeStyles.font]);
 
   const handleThemeChange = useCallback(
     (selectedTheme: string) => {
-      applyThemeSettings(selectedTheme);
+      const normalizedTheme = selectedTheme.toLowerCase() as ThemeKey;
+      const selectedThemeSettings = themes[normalizedTheme];
+      if (!selectedThemeSettings) return;
+      updateActiveStyles({
+        theme: normalizedTheme,
+        font: selectedThemeSettings.fontName,
+        fontScale: selectedThemeSettings.fontScale,
+        headingScale: selectedThemeSettings.headingScale,
+        lineHeightScale: selectedThemeSettings.lineHeightScale,
+        xPaddingScale: selectedThemeSettings.xPaddingScale,
+        yPaddingScale: selectedThemeSettings.yPaddingScale,
+        headerColor: selectedThemeSettings.headerColor,
+        textColor: selectedThemeSettings.textColor,
+        linkColor: selectedThemeSettings.linkColor,
+      });
       const themeKey = selectedTheme.toLowerCase() as ThemeKey;
       const preset = themePresetMeta[themeKey];
       if (!preset) return;
@@ -396,21 +497,23 @@ function EditorPageContent() {
         message: `已切换到 ${preset.label}：${preset.expectation}`,
       });
     },
-    [applyThemeSettings]
+    [updateActiveStyles]
   );
 
   const handleDensityPresetChange = useCallback((presetId: DensityPresetId) => {
     const preset = densityPresets.find((item) => item.id === presetId);
     if (!preset) return;
 
-    setLineHeightScale(preset.lineHeightScale);
-    setXPaddingScale(preset.xPaddingScale);
-    setYPaddingScale(preset.yPaddingScale);
+    updateActiveStyles({
+      lineHeightScale: preset.lineHeightScale,
+      xPaddingScale: preset.xPaddingScale,
+      yPaddingScale: preset.yPaddingScale,
+    });
     setFeedback({
       tone: "success",
       message: `版式密度已调整为"${preset.label}"。`,
     });
-  }, [setLineHeightScale, setXPaddingScale, setYPaddingScale]);
+  }, [updateActiveStyles]);
 
   const handleExportPdf = async () => {
     if (isExporting) return;
@@ -438,18 +541,18 @@ function EditorPageContent() {
         },
         body: JSON.stringify({
           html: exportRoot ? exportRoot.innerHTML : previewElement.innerHTML,
-          theme,
+          theme: activeStyles.theme,
           styles: {
-            fontName: getFontFamilyStack(font),
-            fontScale,
-            headingScale,
-            lineHeightScale,
-            xPaddingScale,
-            yPaddingScale,
-            headerColor,
-            textColor,
-            linkColor,
-            customCss,
+            fontName: getFontFamilyStack(activeStyles.font),
+            fontScale: activeStyles.fontScale,
+            headingScale: activeStyles.headingScale,
+            lineHeightScale: activeStyles.lineHeightScale,
+            xPaddingScale: activeStyles.xPaddingScale,
+            yPaddingScale: activeStyles.yPaddingScale,
+            headerColor: activeStyles.headerColor,
+            textColor: activeStyles.textColor,
+            linkColor: activeStyles.linkColor,
+            customCss: activeStyles.customCss,
           },
         }),
       });
@@ -560,17 +663,17 @@ function EditorPageContent() {
         <div className="shrink-0 lg:hidden">
           <MobileScreenWarning
             content={activeMarkdown}
-            theme={theme}
-            font={font}
-            fontScale={fontScale}
-            headingScale={headingScale}
-            lineHeightScale={lineHeightScale}
-            xPaddingScale={xPaddingScale}
-            yPaddingScale={yPaddingScale}
-            headerColor={headerColor}
-            textColor={textColor}
-            linkColor={linkColor}
-            customCss={customCss}
+            theme={activeStyles.theme}
+            font={activeStyles.font}
+            fontScale={activeStyles.fontScale}
+            headingScale={activeStyles.headingScale}
+            lineHeightScale={activeStyles.lineHeightScale}
+            xPaddingScale={activeStyles.xPaddingScale}
+            yPaddingScale={activeStyles.yPaddingScale}
+            headerColor={activeStyles.headerColor}
+            textColor={activeStyles.textColor}
+            linkColor={activeStyles.linkColor}
+            customCss={activeStyles.customCss}
           />
         </div>
 
@@ -675,23 +778,23 @@ function EditorPageContent() {
                       {isMasterActive ? "底稿预览区" : `${activeVersion?.name ?? "岗位"}预览区`}
                     </p>
                     <span className="text-xs text-[--ui-text-muted]">
-                      {themePresetMeta[(theme in themePresetMeta ? theme : "tehran") as ThemeKey]?.label ?? "主题"}
+                      {themePresetMeta[(activeStyles.theme in themePresetMeta ? activeStyles.theme : "tehran") as ThemeKey]?.label ?? "主题"}
                     </span>
                   </div>
                   <div className="min-h-0 flex-1 overflow-hidden">
                     <Preview
                       content={activeMarkdown}
-                      theme={theme}
-                      font={font}
-                      fontScale={fontScale}
-                      headingScale={headingScale}
-                      lineHeightScale={lineHeightScale}
-                      xPaddingScale={xPaddingScale}
-                      yPaddingScale={yPaddingScale}
-                      headerColor={headerColor}
-                      textColor={textColor}
-                      linkColor={linkColor}
-                      customCss={customCss}
+                      theme={activeStyles.theme}
+                      font={activeStyles.font}
+                      fontScale={activeStyles.fontScale}
+                      headingScale={activeStyles.headingScale}
+                      lineHeightScale={activeStyles.lineHeightScale}
+                      xPaddingScale={activeStyles.xPaddingScale}
+                      yPaddingScale={activeStyles.yPaddingScale}
+                      headerColor={activeStyles.headerColor}
+                      textColor={activeStyles.textColor}
+                      linkColor={activeStyles.linkColor}
+                      customCss={activeStyles.customCss}
                       previewContainerRef={previewContainerRef}
                       testId="editor-preview-desktop"
                       paperTestId="editor-preview-paper-desktop"
@@ -707,27 +810,27 @@ function EditorPageContent() {
                 variant="inline"
                 onThemeChange={handleThemeChange}
                 onDensityPresetChange={handleDensityPresetChange}
-                onFontChange={setFont}
-                onFontSizeChange={setFontScale}
-                onLineHeightChange={setLineHeightScale}
-                onXPaddingChange={setXPaddingScale}
-                onYPaddingChange={setYPaddingScale}
-                fontScale={fontScale}
-                lineHeightScale={lineHeightScale}
-                headingScale={headingScale}
-                onHeadingChange={setHeadingScale}
-                xPaddingScale={xPaddingScale}
-                yPaddingScale={yPaddingScale}
-                selectedTheme={theme}
-                headerColor={headerColor}
-                setHeaderColor={setHeaderColor}
-                textColor={textColor}
-                setTextColor={setTextColor}
-                linkColor={linkColor}
-                setLinkColor={setLinkColor}
-                customCss={customCss}
-                onCustomCssChange={setCustomCss}
-                font={font}
+                onFontChange={(nextFont) => updateActiveStyles({ font: nextFont })}
+                onFontSizeChange={(size) => updateActiveStyles({ fontScale: size })}
+                onLineHeightChange={(height) => updateActiveStyles({ lineHeightScale: height })}
+                onXPaddingChange={(padding) => updateActiveStyles({ xPaddingScale: padding })}
+                onYPaddingChange={(padding) => updateActiveStyles({ yPaddingScale: padding })}
+                fontScale={activeStyles.fontScale}
+                lineHeightScale={activeStyles.lineHeightScale}
+                headingScale={activeStyles.headingScale}
+                onHeadingChange={(nextHeading) => updateActiveStyles({ headingScale: nextHeading })}
+                xPaddingScale={activeStyles.xPaddingScale}
+                yPaddingScale={activeStyles.yPaddingScale}
+                selectedTheme={activeStyles.theme}
+                headerColor={activeStyles.headerColor}
+                setHeaderColor={(color) => updateActiveStyles({ headerColor: color })}
+                textColor={activeStyles.textColor}
+                setTextColor={(color) => updateActiveStyles({ textColor: color })}
+                linkColor={activeStyles.linkColor}
+                setLinkColor={(color) => updateActiveStyles({ linkColor: color })}
+                customCss={activeStyles.customCss}
+                onCustomCssChange={(css) => updateActiveStyles({ customCss: css })}
+                font={activeStyles.font}
                 aiRawInput={rawInput}
                 onAiRawInputChange={setRawInput}
                 baseMarkdown={masterMarkdown}
@@ -737,9 +840,9 @@ function EditorPageContent() {
                 llmSettings={llmSettings}
                 onMarkdownGenerated={handleMasterGenerated}
                 onAdaptedMarkdownGenerated={handleAdaptedMarkdownGenerated}
-                theme={theme}
-                stylePrompt={stylePrompt}
-                onStylePromptChange={setStylePrompt}
+                theme={activeStyles.theme}
+                stylePrompt={activeStyles.stylePrompt}
+                onStylePromptChange={(prompt) => updateActiveStyles({ stylePrompt: prompt })}
                 savedStyleTemplates={savedStyleTemplates}
                 onSaveStyleTemplate={handleSaveStyleTemplate}
                 onApplyStyleTemplate={handleApplyStyleTemplate}
