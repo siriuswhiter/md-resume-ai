@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  adaptMarkdownResumeForJob,
   generateMarkdownResumeBody,
   generatePreviewCssTemplate,
 } from "@/lib/llm";
@@ -22,14 +23,21 @@ import { siteSans } from "@/lib/siteFonts";
 
 const RESUME_PLACEHOLDER =
   "粘贴杂乱经历，例如：联系方式、教育背景、工作经历、项目要点、技能清单、求职方向。";
+const JOB_PLACEHOLDER =
+  "粘贴目标岗位、招聘 JD 或岗位关键词，例如：前端工程师 / React / B 端 SaaS / 性能优化。";
 const STYLE_PLACEHOLDER =
   "例如：H2 下方加细横线，列表更紧凑，链接不要下划线。";
 
 type Props = {
   rawInput: string;
   onRawInputChange: (v: string) => void;
+  baseMarkdown: string;
+  activeDocumentLabel: string;
+  jobTarget: string;
+  onJobTargetChange: (v: string) => void;
   llmSettings: LlmSettings;
   onMarkdownGenerated: (md: string) => void;
+  onAdaptedMarkdownGenerated: (md: string, jobTarget: string) => void;
   theme: string;
   font: string;
   fontScale: number;
@@ -57,8 +65,13 @@ type Props = {
 export function SidebarAiSection({
   rawInput,
   onRawInputChange,
+  baseMarkdown,
+  activeDocumentLabel,
+  jobTarget,
+  onJobTargetChange,
   llmSettings,
   onMarkdownGenerated,
+  onAdaptedMarkdownGenerated,
   theme,
   font,
   fontScale,
@@ -82,6 +95,9 @@ export function SidebarAiSection({
   const [resumeLoading, setResumeLoading] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
   const [resumeSuccess, setResumeSuccess] = useState<string | null>(null);
+  const [adaptLoading, setAdaptLoading] = useState(false);
+  const [adaptError, setAdaptError] = useState<string | null>(null);
+  const [adaptSuccess, setAdaptSuccess] = useState<string | null>(null);
   const [styleLoading, setStyleLoading] = useState(false);
   const [styleError, setStyleError] = useState<string | null>(null);
   const [styleSuccess, setStyleSuccess] = useState<string | null>(null);
@@ -130,7 +146,7 @@ export function SidebarAiSection({
       const markdown = await generateMarkdownResumeBody(llmSettings, rawInput);
       onMarkdownGenerated(markdown);
       setExpandedOpen(false);
-      setResumeSuccess("草稿已写入编辑区。");
+      setResumeSuccess("底稿已写入编辑区。");
     } catch (e) {
       setResumeError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -177,6 +193,37 @@ export function SidebarAiSection({
       setStyleError(e instanceof Error ? e.message : String(e));
     } finally {
       setStyleLoading(false);
+    }
+  };
+
+  const handleAdaptResume = async () => {
+    setAdaptError(null);
+    setAdaptSuccess(null);
+    if (!requireConfiguredLlm()) {
+      setAdaptError("请先在右上角「设置」中完成 AI 配置。");
+      return;
+    }
+    if (!baseMarkdown.trim()) {
+      setAdaptError("请先生成或编辑固定底稿。");
+      return;
+    }
+    if (!jobTarget.trim()) {
+      setAdaptError("请先填写目标岗位或岗位 JD。");
+      return;
+    }
+    setAdaptLoading(true);
+    try {
+      const markdown = await adaptMarkdownResumeForJob(llmSettings, {
+        baseMarkdown,
+        jobTarget,
+        rawText: rawInput,
+      });
+      onAdaptedMarkdownGenerated(markdown, jobTarget);
+      setAdaptSuccess("适配简历已写入岗位版本。");
+    } catch (e) {
+      setAdaptError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setAdaptLoading(false);
     }
   };
 
@@ -244,6 +291,42 @@ export function SidebarAiSection({
 
         {resumeSuccess ? <StatusBar type="success" message={resumeSuccess} /> : null}
         {resumeError ? <StatusBar type="error" message={resumeError} /> : null}
+      </div>
+
+      {/* Job adaptation */}
+      <div className="rounded-[var(--ui-radius)] border border-[--ui-border] p-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-xs font-medium text-[--ui-text-muted]">岗位适配</p>
+          <span className="truncate text-[11px] text-[--ui-text-muted]" title={activeDocumentLabel}>
+            {activeDocumentLabel}
+          </span>
+        </div>
+
+        <textarea
+          className="min-h-[90px] w-full resize-y rounded-[4px] border border-[--ui-border] bg-[--ui-bg-subtle] px-3 py-2 text-xs leading-5 text-[--ui-text] outline-none placeholder:text-[--ui-text-muted] focus:border-[--ui-text]"
+          value={jobTarget}
+          onChange={(e) => {
+            onJobTargetChange(e.target.value);
+            if (adaptSuccess) setAdaptSuccess(null);
+            if (adaptError) setAdaptError(null);
+          }}
+          placeholder={JOB_PLACEHOLDER}
+          spellCheck={false}
+          aria-label="目标岗位或岗位 JD"
+        />
+
+        <button
+          type="button"
+          className={cn(btnPrimary, "mt-2 w-full")}
+          disabled={adaptLoading}
+          onClick={handleAdaptResume}
+        >
+          <WandSparkles className={cn("h-3.5 w-3.5", adaptLoading && "animate-pulse")} />
+          {adaptLoading ? "适配中..." : "生成适配简历"}
+        </button>
+
+        {adaptSuccess ? <StatusBar type="success" message={adaptSuccess} /> : null}
+        {adaptError ? <StatusBar type="error" message={adaptError} /> : null}
       </div>
 
       {/* Style assistant */}

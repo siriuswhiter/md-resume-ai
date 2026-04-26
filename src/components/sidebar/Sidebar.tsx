@@ -51,8 +51,13 @@ interface SidebarProps {
   font: string;
   aiRawInput: string;
   onAiRawInputChange: (v: string) => void;
+  baseMarkdown: string;
+  activeDocumentLabel: string;
+  jobTarget: string;
+  onJobTargetChange: (v: string) => void;
   llmSettings: LlmSettings;
   onMarkdownGenerated: (md: string) => void;
+  onAdaptedMarkdownGenerated: (md: string, jobTarget: string) => void;
   theme: string;
   stylePrompt: string;
   onStylePromptChange: (v: string) => void;
@@ -95,8 +100,13 @@ export default function Sidebar({
   font,
   aiRawInput,
   onAiRawInputChange,
+  baseMarkdown,
+  activeDocumentLabel,
+  jobTarget,
+  onJobTargetChange,
   llmSettings,
   onMarkdownGenerated,
+  onAdaptedMarkdownGenerated,
   theme,
   stylePrompt,
   onStylePromptChange,
@@ -341,8 +351,13 @@ export default function Sidebar({
           <SidebarAiSection
             rawInput={aiRawInput}
             onRawInputChange={onAiRawInputChange}
+            baseMarkdown={baseMarkdown}
+            activeDocumentLabel={activeDocumentLabel}
+            jobTarget={jobTarget}
+            onJobTargetChange={onJobTargetChange}
             llmSettings={llmSettings}
             onMarkdownGenerated={onMarkdownGenerated}
+            onAdaptedMarkdownGenerated={onAdaptedMarkdownGenerated}
             theme={theme}
             font={font}
             fontScale={fontScale}

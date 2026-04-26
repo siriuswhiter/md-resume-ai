@@ -7,8 +7,10 @@ import {
   CheckCircle2,
   Download,
   Loader2,
+  Plus,
   ScanSearch,
   Settings,
+  Trash2,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Editor from "@/components/editor/Editor";
@@ -46,6 +48,15 @@ interface FeedbackState {
   message: string;
 }
 
+type JobResumeVersion = {
+  id: string;
+  name: string;
+  jobTarget: string;
+  markdown: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export default function EditorPage() {
   return (
     <Suspense fallback={<div className="p-6 text-sm text-slate-500">正在加载编辑器...</div>}>
@@ -58,9 +69,17 @@ function EditorPageContent() {
   const searchParams = useSearchParams();
   const template = searchParams.get("template");
 
-  const [markdown, setMarkdownStorage, markdownHydrated] = useLocalStorage<string>(
+  const [masterMarkdown, setMasterMarkdownStorage, markdownHydrated] = useLocalStorage<string>(
     "MARKDOWN_CONTENT",
     ""
+  );
+  const [jobVersions, setJobVersions, jobVersionsHydrated] = useLocalStorage<JobResumeVersion[]>(
+    "JOB_RESUME_VERSIONS",
+    []
+  );
+  const [activeDocumentId, setActiveDocumentId] = useLocalStorage<string>(
+    "ACTIVE_RESUME_DOCUMENT_ID",
+    "master"
   );
   const [theme, setTheme] = useLocalStorage<string>("SELECTED_THEME", "tehran");
   const initialThemeKey = (theme in themes ? theme : "tehran") as ThemeKey;
@@ -115,6 +134,7 @@ function EditorPageContent() {
     []
   );
   const [rawInput, setRawInput] = useLocalStorage<string>("RESUME_AI_RAW_INPUT", "");
+  const [jobTarget, setJobTarget] = useLocalStorage<string>("RESUME_AI_JOB_TARGET", "");
 
   const [llmSettings, setLlmSettings] = useState<LlmSettings>(() => defaultLlmSettings());
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -123,15 +143,141 @@ function EditorPageContent() {
 
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const activeVersion =
+    activeDocumentId === "master"
+      ? null
+      : jobVersions.find((item) => item.id === activeDocumentId) ?? null;
+  const activeMarkdown = activeVersion?.markdown ?? masterMarkdown;
+  const activeJobTarget = activeVersion?.jobTarget ?? jobTarget;
+  const isMasterActive = activeDocumentId === "master" || !activeVersion;
+
   useEffect(() => {
     setLlmSettings(loadLlmSettings());
   }, []);
 
   const updateMarkdown = useCallback(
     (value: string) => {
-      setMarkdownStorage(value);
+      if (activeVersion) {
+        setJobVersions(
+          jobVersions.map((item) =>
+            item.id === activeVersion.id
+              ? { ...item, markdown: value, updatedAt: new Date().toISOString() }
+              : item
+          )
+        );
+        return;
+      }
+      setMasterMarkdownStorage(value);
     },
-    [setMarkdownStorage]
+    [activeVersion, jobVersions, setJobVersions, setMasterMarkdownStorage]
+  );
+
+  const handleMasterGenerated = useCallback(
+    (md: string) => {
+      setMasterMarkdownStorage(md);
+      setActiveDocumentId("master");
+      setFeedback({
+        tone: "success",
+        message: "底稿已写入编辑区。",
+      });
+    },
+    [setActiveDocumentId, setMasterMarkdownStorage]
+  );
+
+  const handleJobTargetChange = useCallback(
+    (value: string) => {
+      if (activeVersion) {
+        setJobVersions(
+          jobVersions.map((item) =>
+            item.id === activeVersion.id
+              ? { ...item, jobTarget: value, name: value.trim().split(/\s+/)[0] || item.name, updatedAt: new Date().toISOString() }
+              : item
+          )
+        );
+        return;
+      }
+      setJobTarget(value);
+    },
+    [activeVersion, jobVersions, setJobTarget, setJobVersions]
+  );
+
+  const createJobVersion = useCallback(
+    (initial?: { name?: string; jobTarget?: string; markdown?: string }) => {
+      const now = new Date().toISOString();
+      const target = initial?.jobTarget?.trim() || jobTarget.trim();
+      const next: JobResumeVersion = {
+        id: `job_${Date.now()}`,
+        name: initial?.name?.trim() || target.split(/\s+/)[0] || `岗位 ${jobVersions.length + 1}`,
+        jobTarget: target,
+        markdown: initial?.markdown ?? masterMarkdown,
+        createdAt: now,
+        updatedAt: now,
+      };
+      setJobVersions([next, ...jobVersions]);
+      setActiveDocumentId(next.id);
+      return next;
+    },
+    [jobTarget, jobVersions, masterMarkdown, setActiveDocumentId, setJobVersions]
+  );
+
+  const handleAdaptedMarkdownGenerated = useCallback(
+    (md: string, target: string) => {
+      const now = new Date().toISOString();
+      const trimmedTarget = target.trim();
+      if (activeVersion) {
+        setJobVersions(
+          jobVersions.map((item) =>
+            item.id === activeVersion.id
+              ? {
+                  ...item,
+                  name: trimmedTarget.split(/\s+/)[0] || item.name,
+                  jobTarget: trimmedTarget,
+                  markdown: md,
+                  updatedAt: now,
+                }
+              : item
+          )
+        );
+        setFeedback({
+          tone: "success",
+          message: `"${activeVersion.name}"适配简历已更新。`,
+        });
+        return;
+      }
+
+      const next: JobResumeVersion = {
+        id: `job_${Date.now()}`,
+        name: trimmedTarget.split(/\s+/)[0] || `岗位 ${jobVersions.length + 1}`,
+        jobTarget: trimmedTarget,
+        markdown: md,
+        createdAt: now,
+        updatedAt: now,
+      };
+      setJobVersions([next, ...jobVersions]);
+      setActiveDocumentId(next.id);
+      setFeedback({
+        tone: "success",
+        message: `"${next.name}"适配简历已创建。`,
+      });
+    },
+    [activeVersion, jobVersions, setActiveDocumentId, setJobVersions]
+  );
+
+  const handleDeleteJobVersion = useCallback(
+    (id: string) => {
+      const target = jobVersions.find((item) => item.id === id);
+      setJobVersions(jobVersions.filter((item) => item.id !== id));
+      if (activeDocumentId === id) {
+        setActiveDocumentId("master");
+      }
+      if (target) {
+        setFeedback({
+          tone: "success",
+          message: `"${target.name}"版本已删除。`,
+        });
+      }
+    },
+    [activeDocumentId, jobVersions, setActiveDocumentId, setJobVersions]
   );
 
   const handleLlmSettingsChange = useCallback((settings: LlmSettings) => {
@@ -206,26 +352,33 @@ function EditorPageContent() {
 
   useEffect(() => {
     if (!markdownHydrated) return;
-    if (markdown) return;
+    if (masterMarkdown) return;
 
     const selectedTemplate = (template || "mashhad").toLowerCase();
 
     fetch(`/templates/${selectedTemplate}.md`)
       .then((res) => {
         if (!res.ok) {
-          updateMarkdown("无法加载默认简历模板。");
+          setMasterMarkdownStorage("无法加载默认简历模板。");
           return;
         }
 
         res.text().then((content) => {
-          updateMarkdown(content);
+          setMasterMarkdownStorage(content);
           applyThemeSettings(selectedTemplate);
         });
       })
       .catch(() => {
-        updateMarkdown("无法加载默认简历模板。");
+        setMasterMarkdownStorage("无法加载默认简历模板。");
       });
-  }, [applyThemeSettings, markdown, markdownHydrated, template, updateMarkdown]);
+  }, [applyThemeSettings, masterMarkdown, markdownHydrated, setMasterMarkdownStorage, template]);
+
+  useEffect(() => {
+    if (!jobVersionsHydrated) return;
+    if (activeDocumentId === "master") return;
+    if (jobVersions.some((item) => item.id === activeDocumentId)) return;
+    setActiveDocumentId("master");
+  }, [activeDocumentId, jobVersions, jobVersionsHydrated, setActiveDocumentId]);
 
   useEffect(() => {
     if (!(font in fonts)) return;
@@ -330,7 +483,7 @@ function EditorPageContent() {
   };
 
   const resumeTitle =
-    markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || "未命名简历";
+    activeMarkdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || (isMasterActive ? "底稿" : activeVersion?.name) || "未命名简历";
 
   const feedbackStyles: Record<
     FeedbackTone,
@@ -406,7 +559,7 @@ function EditorPageContent() {
       <div className="mx-auto flex max-w-[1720px] flex-1 flex-col px-3 py-3 lg:min-h-0 lg:w-full lg:overflow-hidden lg:px-4">
         <div className="shrink-0 lg:hidden">
           <MobileScreenWarning
-            content={markdown}
+            content={activeMarkdown}
             theme={theme}
             font={font}
             fontScale={fontScale}
@@ -437,13 +590,79 @@ function EditorPageContent() {
             </div>
           ) : null}
 
+          <div className="flex shrink-0 items-center gap-2 overflow-x-auto rounded-[var(--ui-radius)] border border-[--ui-border] bg-white px-3 py-2">
+            <button
+              type="button"
+              className={cn(
+                "shrink-0 rounded-[4px] border px-3 py-1.5 text-xs font-medium transition-colors",
+                isMasterActive
+                  ? "border-[--ui-text] bg-[--ui-text] text-white"
+                  : "border-[--ui-border] text-[--ui-text] hover:border-[--ui-text]"
+              )}
+              onClick={() => setActiveDocumentId("master")}
+            >
+              固定底稿
+            </button>
+
+            {jobVersions.map((item) => {
+              const active = activeVersion?.id === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "flex shrink-0 items-center overflow-hidden rounded-[4px] border transition-colors",
+                    active
+                      ? "border-[--ui-text] bg-[--ui-text] text-white"
+                      : "border-[--ui-border] bg-white text-[--ui-text] hover:border-[--ui-text]"
+                  )}
+                >
+                  <button
+                    type="button"
+                    className="max-w-[180px] truncate px-3 py-1.5 text-xs font-medium"
+                    onClick={() => setActiveDocumentId(item.id)}
+                    title={item.jobTarget || item.name}
+                  >
+                    {item.name}
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "border-l px-2 py-1.5 transition-colors",
+                      active ? "border-white/25 hover:bg-white/10" : "border-[--ui-border] hover:text-red-600"
+                    )}
+                    onClick={() => handleDeleteJobVersion(item.id)}
+                    aria-label={`删除 ${item.name}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+
+            <button
+              type="button"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-[4px] border border-[--ui-border] px-3 py-1.5 text-xs font-medium text-[--ui-text] transition-colors hover:border-[--ui-text]"
+              onClick={() => createJobVersion()}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              新岗位
+            </button>
+          </div>
+
           <div className="grid min-h-0 flex-1 gap-3 min-[1280px]:grid-cols-[minmax(0,1fr)_260px] lg:overflow-hidden">
             <div className="min-w-0 min-h-0 overflow-hidden">
               <div className="grid h-full min-h-0 gap-3 min-[1180px]:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
                 <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--ui-radius)] border border-[--ui-border] bg-white">
+                  <div className="flex shrink-0 items-center justify-between border-b border-[--ui-border] px-3 py-2">
+                    <p className="truncate text-xs font-medium text-[--ui-text-muted]">
+                      {isMasterActive ? "底稿编辑区" : `${activeVersion?.name ?? "岗位"}编辑区`}
+                    </p>
+                    <span className="text-xs text-[--ui-text-muted]">{activeMarkdown.length} 字</span>
+                  </div>
                   <div className="min-h-0 flex-1 overflow-hidden">
                     <Editor
-                      markdown={markdown}
+                      key={activeVersion?.id ?? "master"}
+                      markdown={activeMarkdown}
                       onChangeAction={updateMarkdown}
                       className="h-full min-h-0"
                     />
@@ -451,9 +670,17 @@ function EditorPageContent() {
                 </section>
 
                 <section className="flex min-h-0 flex-col overflow-hidden rounded-[var(--ui-radius)] border border-[--ui-border] bg-[--ui-bg-subtle]">
+                  <div className="flex shrink-0 items-center justify-between border-b border-[--ui-border] bg-white px-3 py-2">
+                    <p className="truncate text-xs font-medium text-[--ui-text-muted]">
+                      {isMasterActive ? "底稿预览区" : `${activeVersion?.name ?? "岗位"}预览区`}
+                    </p>
+                    <span className="text-xs text-[--ui-text-muted]">
+                      {themePresetMeta[(theme in themePresetMeta ? theme : "tehran") as ThemeKey]?.label ?? "主题"}
+                    </span>
+                  </div>
                   <div className="min-h-0 flex-1 overflow-hidden">
                     <Preview
-                      content={markdown}
+                      content={activeMarkdown}
                       theme={theme}
                       font={font}
                       fontScale={fontScale}
@@ -503,8 +730,13 @@ function EditorPageContent() {
                 font={font}
                 aiRawInput={rawInput}
                 onAiRawInputChange={setRawInput}
+                baseMarkdown={masterMarkdown}
+                activeDocumentLabel={isMasterActive ? "固定底稿" : activeVersion?.name ?? "岗位版本"}
+                jobTarget={activeJobTarget}
+                onJobTargetChange={handleJobTargetChange}
                 llmSettings={llmSettings}
-                onMarkdownGenerated={updateMarkdown}
+                onMarkdownGenerated={handleMasterGenerated}
+                onAdaptedMarkdownGenerated={handleAdaptedMarkdownGenerated}
                 theme={theme}
                 stylePrompt={stylePrompt}
                 onStylePromptChange={setStylePrompt}

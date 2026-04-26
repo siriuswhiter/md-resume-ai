@@ -206,6 +206,18 @@ body_markdown 为完整 Markdown 正文，可按用户输入按需组织，例�
 
 const MD_USER_INSTRUCTION = `请从用户粘贴的原始材料中提炼重点，按内容类型按需组织简历模块，并把项目/经历按更专业、结果导向、符合 STAR 思路的简历语言重写。不要默认生成个人摘要或为凑结构补齐无关章节。正文默认用 Markdown；只有头部确实需要左右布局时，才有限使用受限 HTML。输出 JSON（仅字段 body_markdown）：`;
 
+const JOB_ADAPTATION_SYSTEM = `${MARKDOWN_RESUME_SYSTEM}
+
+【岗位适配追加要求】
+- 用户会提供一份现有简历底稿，以及一个目标岗位/岗位 JD。
+- 你需要在不编造经历的前提下，重排、取舍、改写简历，使其更贴合目标岗位。
+- 优先突出与目标岗位职责、技能栈、业务场景、成果指标相关的经历。
+- 可调整标题、技能分组、项目顺序、bullet 表达和关键词密度。
+- 如果底稿缺少岗位要求中的关键信息，只能用「待补充」提示，不要虚构。
+- 保持适合投递的紧凑 Markdown 简历，不要输出分析过程、匹配说明或修改清单。`;
+
+const JOB_ADAPTATION_USER_INSTRUCTION = `请基于现有简历底稿生成一版目标岗位适配简历。只输出 JSON（仅字段 body_markdown）。`;
+
 const STYLE_ASSISTANT_SYSTEM = `你是资深前端样式工程师，负责为 Markdown 简历预览生成可直接使用的 CSS。
 
 【上下文】
@@ -310,6 +322,117 @@ export async function generateMarkdownResumeBody(
     };
   } catch {
     throw new Error("无法解析模型返回的 JSON，请重试或缩短输入");
+  }
+
+  const md =
+    typeof parsed.body_markdown === "string"
+      ? parsed.body_markdown.trim()
+      : "";
+  if (!md) throw new Error("模型未返回有效的 body_markdown");
+
+  return md;
+}
+
+export async function adaptMarkdownResumeForJob(
+  settings: LlmSettings,
+  input: {
+    baseMarkdown: string;
+    jobTarget: string;
+    rawText?: string;
+  }
+): Promise<string> {
+  if (!settings.useServerRoute && !settings.apiKey.trim()) {
+    throw new Error("当前为浏览器直连模式，但未配置 API Key。请在“配置 AI”中填写密钥，或启用服务端 Key。");
+  }
+
+  const baseMarkdown = input.baseMarkdown.trim();
+  const jobTarget = input.jobTarget.trim();
+  if (!baseMarkdown) throw new Error("请先在编辑区准备一份简历底稿。");
+  if (!jobTarget) throw new Error("请先填写目标岗位或岗位 JD。");
+
+  const url = resolveChatUrl(settings);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (!settings.useServerRoute && settings.apiKey.trim()) {
+    headers.Authorization = `Bearer ${settings.apiKey}`;
+  }
+
+  const body = {
+    model: settings.model,
+    temperature: 0.28,
+    messages: [
+      { role: "system" as const, content: JOB_ADAPTATION_SYSTEM },
+      {
+        role: "user" as const,
+        content: `${JOB_ADAPTATION_USER_INSTRUCTION}
+
+目标岗位 / JD：
+-----
+${jobTarget}
+-----
+
+现有简历底稿：
+-----
+${baseMarkdown}
+-----
+
+${input.rawText?.trim() ? `原始材料补充（仅用于校验事实，不要编造）：\n-----\n${input.rawText.trim()}\n-----\n` : ""}
+请输出一份完整、可直接替换编辑区内容的 Markdown 简历。`,
+      },
+    ],
+  };
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const responseText = await res.text();
+  const trimmed = responseText.trimStart();
+
+  if (!res.ok) {
+    if (trimmed.startsWith("<")) {
+      throw new Error(
+        `API ${res.status}：返回了 HTML 页面而非 JSON。请确认请求路径为 /api/llm/chat/（带尾部斜杠），并检查服务端配置。`
+      );
+    }
+    const detail = extractErrorMessage(responseText).slice(0, 500);
+    if (
+      res.status === 401 &&
+      /missing authentication header|authorization/i.test(detail)
+    ) {
+      throw new Error(buildAuthErrorMessage(settings, detail));
+    }
+    throw new Error(`API ${res.status}: ${detail}`);
+  }
+
+  if (trimmed.startsWith("<")) {
+    throw new Error(
+      "接口返回了 HTML 而非 JSON（常见于路径缺少尾部斜杠、404 或代理错误页）。请使用路径 /api/llm/chat/ 后重试。"
+    );
+  }
+
+  let data: { choices?: { message?: { content?: string } }[] };
+  try {
+    data = JSON.parse(responseText) as {
+      choices?: { message?: { content?: string } }[];
+    };
+  } catch {
+    throw new Error(`无法解析接口 JSON：${responseText.slice(0, 280)}`);
+  }
+
+  const content = data.choices?.[0]?.message?.content?.trim() ?? "";
+  if (!content) throw new Error("模型返回为空");
+
+  let parsed: { body_markdown?: string };
+  try {
+    parsed = JSON.parse(extractJsonObject(content)) as {
+      body_markdown?: string;
+    };
+  } catch {
+    throw new Error("无法解析岗位适配返回的 JSON，请重试或缩短 JD");
   }
 
   const md =
