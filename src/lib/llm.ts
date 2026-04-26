@@ -213,6 +213,9 @@ const JOB_ADAPTATION_SYSTEM = `${MARKDOWN_RESUME_SYSTEM}
 - 你需要在不编造经历的前提下，重排、取舍、改写简历，使其更贴合目标岗位。
 - 优先突出与目标岗位职责、技能栈、业务场景、成果指标相关的经历。
 - 可调整标题、技能分组、项目顺序、bullet 表达和关键词密度。
+- 如果底稿中已经使用受限 HTML 简历布局（例如 resume-header、resume-header-main、resume-header-side、resume-inline、resume-stack、resume-meta、resume-tag-list、resume-tag），必须尽量保留原有标签层级与 class，只改写其中的文本内容；不要把这些布局结构退化成普通 Markdown。
+- 如果底稿中存在形如“项目名 · 角色 · 时间”的三段式行，适配后仍应保持三段结构与分隔符，方便预览和 PDF 渲染为左右对齐的元信息行。
+- 只允许使用系统已声明的受限 HTML 标签和 class，不要新增 style、table、img、script 或未知 class。
 - 如果底稿缺少岗位要求中的关键信息，只能用「待补充」提示，不要虚构。
 - 保持适合投递的紧凑 Markdown 简历，不要输出分析过程、匹配说明或修改清单。`;
 
