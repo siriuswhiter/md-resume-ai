@@ -11,6 +11,8 @@
 @tailwind utilities;
 
 :root {
+    --font-site-sans: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+    --font-site-mono: "Space Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
     --fontName: "Open Sans";
     --fontScale: 1;
     --headingScale: 1;
@@ -29,6 +31,16 @@
     --ui-text-muted: #888888;
     --ui-radius: 6px;
     --ui-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.font-site-sans,
+.font-site-sans-variable {
+    font-family: var(--font-site-sans);
+}
+
+.font-site-mono,
+.font-site-mono-variable {
+    font-family: var(--font-site-mono);
 }
 
 .previewContainer {

@@ -278,7 +278,7 @@ function EditorPageContent() {
         "[data-preview-content-root]"
       );
 
-      const response = await fetch("/api/generate-pdf", {
+      const response = await fetch("/api/generate-pdf/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -39,6 +39,7 @@ RUN apt-get update \
         curl \
         fonts-freefont-ttf \
         fonts-noto-cjk \
+        tini \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/public ./public
@@ -47,4 +48,5 @@ COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
+ENTRYPOINT ["tini", "--"]
 CMD ["node", "server.js"]
