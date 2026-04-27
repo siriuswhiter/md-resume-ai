@@ -111,6 +111,87 @@ test.describe('Resume Export Flow', () => {
         await context.close();
     });
 
+    test('editor restores persisted non-draft workspace state after refresh', async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: 1600, height: 1200 },
+        });
+        const page = await context.newPage();
+
+        await page.addInitScript(() => {
+            const jobVersion = {
+                id: 'job_persisted',
+                name: '产品经理',
+                jobTarget: '产品经理 JD',
+                markdown: '# Tailored Role\n\n岗位版本内容。',
+                styles: {
+                    theme: 'isfahan',
+                    font: 'Noto Sans SC',
+                    headingScale: 1.2,
+                    fontScale: 1.25,
+                    lineHeightScale: 1.7,
+                    xPaddingScale: 36,
+                    yPaddingScale: 20,
+                    headerColor: '#016ef1',
+                    textColor: '#222222',
+                    linkColor: '#d97706',
+                    customCss: '.previewContainer h2 { border-bottom: 1px solid var(--headerColor); }',
+                    stylePrompt: 'H2 下方加细横线',
+                },
+                createdAt: '2026-04-27T00:00:00.000Z',
+                updatedAt: '2026-04-27T00:00:00.000Z',
+            };
+
+            window.localStorage.setItem('MARKDOWN_CONTENT', JSON.stringify('# Master Draft\n\n固定底稿内容。'));
+            window.localStorage.setItem('JOB_RESUME_VERSIONS', JSON.stringify([jobVersion]));
+            window.localStorage.setItem('ACTIVE_RESUME_DOCUMENT_ID', JSON.stringify('job_persisted'));
+            window.localStorage.setItem('RESUME_AI_RAW_INPUT', JSON.stringify('原始经历内容'));
+            window.localStorage.setItem('RESUME_AI_JOB_TARGET', JSON.stringify('底稿岗位目标'));
+            window.localStorage.setItem('STYLE_ASSISTANT_TEMPLATES', JSON.stringify([
+                {
+                    id: 'style_persisted',
+                    name: '细线标题',
+                    css: '.previewContainer h2 { border-bottom: 1px solid var(--headerColor); }',
+                    summary: '标题下方细线',
+                    createdAt: '2026-04-27T00:00:00.000Z',
+                },
+            ]));
+        });
+
+        await page.goto('http://localhost:3001/editor', { waitUntil: 'networkidle' });
+        await expect(page.getByRole('button', { name: '产品经理' })).toBeVisible();
+        await expect(page.getByTestId('editor-preview-paper-desktop').getByText('Tailored Role')).toBeVisible();
+
+        await page.reload({ waitUntil: 'networkidle' });
+
+        const previewContainer = page.getByTestId('editor-preview-paper-desktop').locator('.previewContainer');
+        await expect(page.getByRole('button', { name: '产品经理' })).toBeVisible();
+        await expect(previewContainer.getByText('Tailored Role')).toBeVisible();
+
+        const previewMetrics = await previewContainer.evaluate((element) => {
+            const containerStyle = window.getComputedStyle(element);
+            const headingStyle = window.getComputedStyle(element.querySelector('h1') as HTMLElement);
+
+            return {
+                fontFamily: containerStyle.fontFamily,
+                paddingLeft: containerStyle.paddingLeft,
+                color: headingStyle.color,
+            };
+        });
+
+        expect(previewMetrics.fontFamily).toContain('Noto Sans SC');
+        expect(previewMetrics.paddingLeft).toBe('36px');
+        expect(previewMetrics.color).toBe('rgb(1, 110, 241)');
+
+        await page.getByRole('button', { name: /AI 助手/i }).click();
+        const textareas = page.locator('.sidebar textarea');
+        await expect(textareas.nth(0)).toHaveValue('原始经历内容');
+        await expect(textareas.nth(1)).toHaveValue('产品经理 JD');
+        await expect(textareas.nth(2)).toHaveValue('H2 下方加细横线');
+        await expect(page.getByText('细线标题')).toBeVisible();
+
+        await context.close();
+    });
+
     test('managed preview styles keep font and page padding controls effective over custom CSS', async ({ browser }) => {
         const context = await browser.newContext({
             viewport: { width: 1600, height: 1200 },

@@ -189,8 +189,8 @@ function EditorPageContent() {
   const updateMarkdown = useCallback(
     (value: string) => {
       if (activeVersion) {
-        setJobVersions(
-          jobVersions.map((item) =>
+        setJobVersions((currentVersions) =>
+          currentVersions.map((item) =>
             item.id === activeVersion.id
               ? { ...item, markdown: value, updatedAt: new Date().toISOString() }
               : item
@@ -206,8 +206,8 @@ function EditorPageContent() {
   const updateActiveStyles = useCallback(
     (patch: Partial<ResumeStyleSettings>) => {
       if (activeVersion) {
-        setJobVersions(
-          jobVersions.map((item) =>
+        setJobVersions((currentVersions) =>
+          currentVersions.map((item) =>
             item.id === activeVersion.id
               ? {
                   ...item,
@@ -272,8 +272,8 @@ function EditorPageContent() {
   const handleJobTargetChange = useCallback(
     (value: string) => {
       if (activeVersion) {
-        setJobVersions(
-          jobVersions.map((item) =>
+        setJobVersions((currentVersions) =>
+          currentVersions.map((item) =>
             item.id === activeVersion.id
               ? { ...item, jobTarget: value, name: value.trim().split(/\s+/)[0] || item.name, updatedAt: new Date().toISOString() }
               : item
@@ -299,7 +299,7 @@ function EditorPageContent() {
         createdAt: now,
         updatedAt: now,
       };
-      setJobVersions([next, ...jobVersions]);
+      setJobVersions((currentVersions) => [next, ...currentVersions]);
       setActiveDocumentId(next.id);
       return next;
     },
@@ -311,8 +311,8 @@ function EditorPageContent() {
       const now = new Date().toISOString();
       const trimmedTarget = target.trim();
       if (activeVersion) {
-        setJobVersions(
-          jobVersions.map((item) =>
+        setJobVersions((currentVersions) =>
+          currentVersions.map((item) =>
             item.id === activeVersion.id
               ? {
                   ...item,
@@ -340,7 +340,7 @@ function EditorPageContent() {
         createdAt: now,
         updatedAt: now,
       };
-      setJobVersions([next, ...jobVersions]);
+      setJobVersions((currentVersions) => [next, ...currentVersions]);
       setActiveDocumentId(next.id);
       setFeedback({
         tone: "success",
@@ -353,7 +353,7 @@ function EditorPageContent() {
   const handleDeleteJobVersion = useCallback(
     (id: string) => {
       const target = jobVersions.find((item) => item.id === id);
-      setJobVersions(jobVersions.filter((item) => item.id !== id));
+      setJobVersions((currentVersions) => currentVersions.filter((item) => item.id !== id));
       if (activeDocumentId === id) {
         setActiveDocumentId("master");
       }
@@ -384,7 +384,7 @@ function EditorPageContent() {
       summary: template.summary,
       createdAt: new Date().toISOString(),
     };
-    setSavedStyleTemplates([nextTemplate, ...savedStyleTemplates]);
+    setSavedStyleTemplates((currentTemplates) => [nextTemplate, ...currentTemplates]);
     setFeedback({
       tone: "success",
       message: `样式模板"${template.name}"已保存到本地。`,
@@ -397,7 +397,7 @@ function EditorPageContent() {
 
   const handleDeleteStyleTemplate = useCallback((id: string) => {
     const target = savedStyleTemplates.find((item) => item.id === id);
-    setSavedStyleTemplates(savedStyleTemplates.filter((item) => item.id !== id));
+    setSavedStyleTemplates((currentTemplates) => currentTemplates.filter((item) => item.id !== id));
     if (target) {
       setFeedback({
         tone: "success",
