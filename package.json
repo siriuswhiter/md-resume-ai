@@ -6,7 +6,7 @@
     "dev": "next dev --hostname 127.0.0.1 --port 3001",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "deploy": "next build && firebase deploy",
     "test": "playwright test",

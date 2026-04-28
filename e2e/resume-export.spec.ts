@@ -271,8 +271,15 @@ test.describe('Resume Export Flow', () => {
         await expect(customCssInput).toBeVisible();
         await customCssInput.fill('.previewContainer h2 { border-bottom: 1px solid var(--headerColor); }');
 
-        let resolveBody: ((value: any) => void) | null = null;
-        const requestBodyPromise = new Promise<any>((resolve) => {
+        type PdfRequestBody = {
+            html?: string;
+            styles?: {
+                customCss?: string;
+            };
+        };
+
+        let resolveBody: ((value: PdfRequestBody) => void) | null = null;
+        const requestBodyPromise = new Promise<PdfRequestBody>((resolve) => {
             resolveBody = resolve;
         });
 
